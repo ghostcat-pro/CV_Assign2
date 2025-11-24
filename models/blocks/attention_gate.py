@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class AttentionGate(nn.Module):
     """Attention gate to filter skip-connection features."""
@@ -18,6 +19,11 @@ class AttentionGate(nn.Module):
     def forward(self, x, g):
         theta = self.theta_x(x)
         phi = self.phi_g(g)
+        
+        # Upsample phi to match theta's spatial dimensions if needed
+        if phi.shape[2:] != theta.shape[2:]:
+            phi = F.interpolate(phi, size=theta.shape[2:], mode='bilinear', align_corners=True)
+        
         f = self.relu(self.bn(theta + phi))
         alpha = self.sigmoid(self.psi(f))
         return x * alpha

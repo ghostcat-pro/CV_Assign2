@@ -37,6 +37,11 @@ wheels/
 # *.h5
 # *.weights
 
+# Raw dataset folder
+raw_suim/
+data/images/
+data/masks/
+
 # Models and checkpoints
 *.pth
 *.pt
