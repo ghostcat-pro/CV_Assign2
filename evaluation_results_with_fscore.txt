@@ -1,0 +1,131 @@
+================================================================================
+COMPREHENSIVE EVALUATION RESULTS - IoU AND F-SCORE
+================================================================================
+
+Overall Performance:
+------------------------------------------------------------
+Model                     Mean IoU        Mean F-score   
+------------------------------------------------------------
+SUIM-Net                   33.12%          41.55%
+UNet-ResAttn               36.26%          45.75%
+UNet-ResAttn-V2            34.77%          44.84%
+UNet-ResAttn-V3            51.91%          61.52%
+DeepLabV3-ResNet50         50.65%          59.75%
+------------------------------------------------------------
+
+Per-Class IoU (%):
+
+Background:
+  SUIM-Net                   82.85%
+  UNet-ResAttn               81.56%
+  UNet-ResAttn-V2            80.51%
+  UNet-ResAttn-V3            85.93%
+  DeepLabV3-ResNet50         86.93%
+
+Diver:
+  SUIM-Net                    0.00%
+  UNet-ResAttn               13.75%
+  UNet-ResAttn-V2            13.08%
+  UNet-ResAttn-V3            40.47%
+  DeepLabV3-ResNet50         33.89%
+
+Plant:
+  SUIM-Net                    0.00%
+  UNet-ResAttn                7.07%
+  UNet-ResAttn-V2            14.45%
+  UNet-ResAttn-V3            15.30%
+  DeepLabV3-ResNet50         13.88%
+
+Wreck:
+  SUIM-Net                   34.46%
+  UNet-ResAttn               33.37%
+  UNet-ResAttn-V2            31.75%
+  UNet-ResAttn-V3            61.18%
+  DeepLabV3-ResNet50         55.13%
+
+Robot:
+  SUIM-Net                   34.87%
+  UNet-ResAttn               35.71%
+  UNet-ResAttn-V2            32.01%
+  UNet-ResAttn-V3            56.57%
+  DeepLabV3-ResNet50         53.06%
+
+Reef/Invertebrate:
+  SUIM-Net                   47.86%
+  UNet-ResAttn               49.77%
+  UNet-ResAttn-V2            43.61%
+  UNet-ResAttn-V3            58.67%
+  DeepLabV3-ResNet50         57.61%
+
+Fish/Vertebrate:
+  SUIM-Net                   12.60%
+  UNet-ResAttn               15.79%
+  UNet-ResAttn-V2            15.45%
+  UNet-ResAttn-V3            37.80%
+  DeepLabV3-ResNet50         41.04%
+
+Sea-floor/Rock:
+  SUIM-Net                   52.35%
+  UNet-ResAttn               53.04%
+  UNet-ResAttn-V2            47.29%
+  UNet-ResAttn-V3            59.33%
+  DeepLabV3-ResNet50         63.69%
+
+
+Per-Class F-score (%):
+
+Background:
+  SUIM-Net                   90.39%
+  UNet-ResAttn               89.63%
+  UNet-ResAttn-V2            88.89%
+  UNet-ResAttn-V3            92.31%
+  DeepLabV3-ResNet50         92.88%
+
+Diver:
+  SUIM-Net                    0.00%
+  UNet-ResAttn               18.76%
+  UNet-ResAttn-V2            18.61%
+  UNet-ResAttn-V3            49.61%
+  DeepLabV3-ResNet50         41.46%
+
+Plant:
+  SUIM-Net                    0.00%
+  UNet-ResAttn               11.08%
+  UNet-ResAttn-V2            21.88%
+  UNet-ResAttn-V3            22.53%
+  DeepLabV3-ResNet50         20.43%
+
+Wreck:
+  SUIM-Net                   47.36%
+  UNet-ResAttn               46.57%
+  UNet-ResAttn-V2            44.15%
+  UNet-ResAttn-V3            72.13%
+  DeepLabV3-ResNet50         67.07%
+
+Robot:
+  SUIM-Net                   47.98%
+  UNet-ResAttn               46.28%
+  UNet-ResAttn-V2            42.88%
+  UNet-ResAttn-V3            67.35%
+  DeepLabV3-ResNet50         63.41%
+
+Reef/Invertebrate:
+  SUIM-Net                   61.81%
+  UNet-ResAttn               63.78%
+  UNet-ResAttn-V2            58.51%
+  UNet-ResAttn-V3            70.32%
+  DeepLabV3-ResNet50         69.53%
+
+Fish/Vertebrate:
+  SUIM-Net                   18.28%
+  UNet-ResAttn               21.71%
+  UNet-ResAttn-V2            21.04%
+  UNet-ResAttn-V3            45.73%
+  DeepLabV3-ResNet50         47.16%
+
+Sea-floor/Rock:
+  SUIM-Net                   66.57%
+  UNet-ResAttn               68.21%
+  UNet-ResAttn-V2            62.78%
+  UNet-ResAttn-V3            72.17%
+  DeepLabV3-ResNet50         76.07%

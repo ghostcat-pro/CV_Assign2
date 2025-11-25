@@ -3,16 +3,16 @@ import numpy as np
 from pathlib import Path
 from torch.utils.data import Dataset
 
-# SUIM palette: 3-bit RGB colors -> 8 classes
+# SUIM palette: 3-bit RGB colors (0 or 255) -> 8 classes
 PALETTE = {
     (0, 0, 0): 0,        # background/waterbody
-    (128, 0, 0): 1,      # diver
-    (0, 128, 0): 2,      # plant/flora
-    (128, 128, 0): 3,    # wreck/ruins
-    (0, 0, 128): 4,      # robot/instrument
-    (128, 0, 128): 5,    # reef/invertebrate
-    (0, 128, 128): 6,    # fish/vertebrate
-    (128, 128, 128): 7,  # sea-floor/rocks
+    (255, 0, 0): 1,      # diver (changed from 128 to 255)
+    (0, 255, 0): 2,      # plant/flora
+    (255, 255, 0): 3,    # wreck/ruins
+    (0, 0, 255): 4,      # robot/instrument
+    (255, 0, 255): 5,    # reef/invertebrate
+    (0, 255, 255): 6,    # fish/vertebrate
+    (255, 255, 255): 7,  # sea-floor/rocks
 }
 
 CLASS_NAMES = [
@@ -62,6 +62,11 @@ class SUIMDataset(Dataset):
         if mask is None:
             raise FileNotFoundError(mask_path)
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
+        
+        # Resize mask to match image dimensions if they differ
+        if mask.shape[:2] != img.shape[:2]:
+            mask = cv2.resize(mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
+        
         mask = mask_rgb_to_class(mask)
 
         if self.transform:
