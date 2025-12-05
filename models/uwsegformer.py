@@ -11,7 +11,7 @@ Architecture:
 
 Supported Backbones:
     - ResNet: resnet18, resnet34, resnet50, resnet101 (default, no dependencies)
-    - MixTransformer: mit_b0, mit_b1, mit_b2, mit_b3, mit_b4, mit_b5 (requires UWSegFormer-main)
+    - MixTransformer: mit_b0 (standalone, no dependencies), mit_b1-b5 (requires UWSegFormer-main)
 """
 from typing import List, Tuple
 import sys
@@ -21,20 +21,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .backbones import ResNetBackbone
+from .backbones import ResNetBackbone, mit_b0 as standalone_mit_b0
 
-# Try to import MixTransformer (optional dependency)
+# Try to import MixTransformer from original implementation (optional dependency)
 MIT_AVAILABLE = False
 try:
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'UWSegFormer-main'))
     from mmseg.models.backbones.mix_transformer import (
-        mit_b0, mit_b1, mit_b2, mit_b3, mit_b4, mit_b5
+        mit_b0 as original_mit_b0, mit_b1, mit_b2, mit_b3, mit_b4, mit_b5
     )
     MIT_AVAILABLE = True
-    print("MixTransformer (MiT) backbones available!")
+    print("MixTransformer (MiT) backbones available from UWSegFormer-main!")
 except ImportError:
-    print("MixTransformer not available. Using ResNet backbones only.")
-    print("To use MiT backbones, ensure UWSegFormer-main folder exists.")
+    print("Original MixTransformer not available. Using standalone MIT-B0 implementation.")
+    print("To use MiT-B1 through B5 backbones, ensure UWSegFormer-main folder exists.")
+
+# Always have MIT-B0 available (standalone implementation)
+mit_b0 = standalone_mit_b0
 
 
 class UIQAModule(nn.Module):
@@ -369,7 +372,8 @@ class UWSegFormer(nn.Module):
     Args:
         backbone (str): Backbone architecture to use.
                        ResNet options (always available): 'resnet18', 'resnet34', 'resnet50', 'resnet101'
-                       MixTransformer options (if UWSegFormer-main available): 'mit_b0', 'mit_b1', 'mit_b2', 'mit_b3', 'mit_b4', 'mit_b5'
+                       MixTransformer options: 'mit_b0' (standalone, always available)
+                                              'mit_b1', 'mit_b2', 'mit_b3', 'mit_b4', 'mit_b5' (requires UWSegFormer-main)
                        Default: 'resnet50' (good balance of speed and accuracy)
         num_classes (int): Number of segmentation classes. Default: 8 (SUIM dataset)
         pretrained (bool): Whether to use ImageNet pretrained weights. Default: True
@@ -410,10 +414,12 @@ class UWSegFormer(nn.Module):
             'resnet101': ('resnet', 'resnet101', [64, 128, 320, 512]),
         }
 
-        # Add MixTransformer backbones if available
+        # Add standalone MIT-B0 (always available)
+        backbone_dict['mit_b0'] = ('mit', mit_b0, [32, 64, 160, 256])
+
+        # Add MixTransformer B1-B5 backbones if original implementation available
         if MIT_AVAILABLE:
             backbone_dict.update({
-                'mit_b0': ('mit', mit_b0, [32, 64, 160, 256]),
                 'mit_b1': ('mit', mit_b1, [64, 128, 320, 512]),
                 'mit_b2': ('mit', mit_b2, [64, 128, 320, 512]),
                 'mit_b3': ('mit', mit_b3, [64, 128, 320, 512]),
@@ -440,13 +446,20 @@ class UWSegFormer(nn.Module):
             )
         elif backbone_type == 'mit':
             # MixTransformer backbone
-            if not MIT_AVAILABLE:
+            # variant is the constructor function (mit_b0, mit_b1, etc.)
+            # For MIT-B0, we always use the standalone implementation
+            # For MIT-B1 through B5, we check if the original implementation is available
+            if backbone == 'mit_b0':
+                # Use standalone implementation (always available)
+                self.backbone = variant(pretrained=pretrained)
+            elif not MIT_AVAILABLE:
                 raise RuntimeError(
                     f"MixTransformer backbone '{backbone}' requested but not available. "
-                    f"Ensure UWSegFormer-main folder exists with mmseg dependencies."
+                    f"Ensure UWSegFormer-main folder exists with mmseg dependencies. "
+                    f"Or use 'mit_b0' which is available standalone."
                 )
-            # variant is the constructor function (mit_b0, mit_b1, etc.)
-            self.backbone = variant(pretrained=pretrained)
+            else:
+                self.backbone = variant(pretrained=pretrained)
         else:
             raise ValueError(f"Unknown backbone type: {backbone_type}")
 
