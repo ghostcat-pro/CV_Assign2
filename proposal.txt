@@ -1,0 +1,34 @@
+Proposal:
+Semantic Segmentation in Underwater Imagery
+Complexity: ★★★ (High)
+Motivation:
+Underwater object segmentation is crucial for enabling autonomous underwater robotics,
+providing essential scene understanding capabilities that directly support critical marine
+exploration and intervention tasks. AUVs (Autonomous Underwater Vehicles) and ROVs
+(Remotely Operated Vehicles) require robust object segmentation techniques to be able to
+distinguish between critical elements like marine structures, biological organisms, geologi-
+cal features, and potential hazards, which is fundamental for safe and effective underwater
+operations. Leveraging Machine Learning models to transform visual data into precise spa-
+tial understanding allows robotic systems to navigate, interact with, and analyze complex
+underwater environments with enhanced perception and decision-making capabilities.
+Dataset:
+• Dataset Size: 1635 images.
+• Annotations: The objects in each image belong to one of 8 classes (waterbody back-
+ground, human divers, aquatic plants/flora, wrecks/ruins, robots and instruments, reefs
+and other invertebrates, fish and other vertebrates, sea-floor and rocks). The pixels of
+each object are colored according to the corresponding class. The segmentation labels
+are provided as masks, using a set of 3-bit binary RGB colors to represent the eight
+categories.
+• Format: image.jpg and mask.bmp
+https://irvlab.cs.umn.edu/resources/suim-dataset
+Challenge:
+1. Propose a custom AI model to perform object segmentation in underwater images.
+2. Train and test the AI-model without and with data augmentation.
+3. Use the following metrics to assess the quality of your implementation:
+• IoU of training and testing;
+• Model complexity (# parameters).
+4. Compare the results of your AI-model with at least 2 existing models (e.g., ResNet,
+VGG, or other), one of which should be SUIM-Net (https://arxiv.org/pdf/2004.
+01241).
+5. Discuss the obtained results.
+References: https://arxiv.org/pdf/2004.01241

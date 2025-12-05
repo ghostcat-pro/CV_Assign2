@@ -10,14 +10,16 @@ from torch.utils.data import DataLoader
 from models.unet_resattn import UNetResAttn
 from models.suimnet import SUIMNet
 from models.deeplab_resnet import get_deeplabv3
+from models.uwsegformer import UWSegFormer
 from datasets.suim_dataset import SUIMDataset
 from datasets.augmentations import train_transforms, val_transforms
 from training.train import train_one_epoch, validate
 from training.loss import DiceCELoss
 from training.eval import evaluate_loader
-from training.utils import save_checkpoint, count_parameters
+from training.utils import save_checkpoint, load_checkpoint, count_parameters
+from training.device_utils import get_device
 
-def get_model(name, num_classes=8):
+def get_model(name, num_classes=8, backbone=None):
     """Load model by name."""
     if name == "unet_resattn":
         return UNetResAttn(in_ch=3, out_ch=num_classes, base_ch=64)
@@ -25,13 +27,16 @@ def get_model(name, num_classes=8):
         return SUIMNet(in_ch=3, out_ch=num_classes, base=32)
     elif name == "deeplabv3":
         return get_deeplabv3(num_classes=num_classes, pretrained=True)
+    elif name == "uwsegformer":
+        # Use specified backbone or default to resnet50
+        backbone = backbone or 'resnet50'
+        return UWSegFormer(backbone=backbone, num_classes=num_classes, pretrained=True)
     else:
         raise ValueError(f"Unknown model: {name}")
 
 def main(args):
-    # Device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    # Device (supports CUDA, MPS, and CPU)
+    device = get_device()
     
     # Datasets
     print(f"\nLoading datasets...")
@@ -57,7 +62,7 @@ def main(args):
     
     # Model
     print(f"\nInitializing {args.model}...")
-    model = get_model(args.model, num_classes=args.num_classes)
+    model = get_model(args.model, num_classes=args.num_classes, backbone=args.backbone)
     model = model.to(device)
     print(f"Parameters: {count_parameters(model):,}")
     
@@ -68,12 +73,22 @@ def main(args):
         optimizer, mode='max', factor=0.5, patience=5
     )
     
-    # Training loop
+    # Resume from checkpoint
+    start_epoch = 1
     best_iou = 0.0
-    print(f"\nStarting training for {args.epochs} epochs...")
+    
+    if args.resume:
+        print(f"\nResuming from checkpoint: {args.resume}")
+        ckpt = load_checkpoint(model, optimizer, args.resume, device)
+        start_epoch = ckpt['epoch'] + 1
+        best_iou = ckpt['best_iou']
+        print(f"  → Loaded epoch {ckpt['epoch']} (Best mIoU: {best_iou:.4f})")
+
+    # Training loop
+    print(f"\nStarting training for {args.epochs} epochs (starting from epoch {start_epoch})...")
     print("=" * 70)
     
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(start_epoch, args.epochs + 1):
         # Train
         train_loss, train_iou = train_one_epoch(
             model, train_loader, optimizer, criterion, device, args.num_classes
@@ -121,8 +136,10 @@ if __name__ == "__main__":
     parser.add_argument("--masks_dir", default="data/masks")
     
     # Model
-    parser.add_argument("--model", choices=["unet_resattn", "suimnet", "deeplabv3"],
+    parser.add_argument("--model", choices=["unet_resattn", "suimnet", "deeplabv3", "uwsegformer"],
                        default="unet_resattn", help="Model architecture")
+    parser.add_argument("--backbone", type=str, default=None,
+                       help="Backbone for uwsegformer. ResNet: resnet18/34/50/101, MiT: mit_b0/b1/b2/b3/b4/b5")
     parser.add_argument("--num_classes", type=int, default=8)
     
     # Training
@@ -131,6 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--augment", action="store_true", help="Use data augmentation")
     parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint to resume from")
     
     args = parser.parse_args()
     main(args)
