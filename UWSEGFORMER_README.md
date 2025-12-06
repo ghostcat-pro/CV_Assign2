@@ -338,13 +338,14 @@ python main_train.py --model uwsegformer --epochs 50 --batch_size 8 --augment
 ```bash
 python main_train.py \
     --model uwsegformer \
+    --backbone mit_b0 \
     --epochs 50 \
     --batch_size 8 \
     --augment \
-    --train_split data/splits/train_split.txt \
-    --val_split data/splits/val_split.txt \
-    --images_dir data/suim/train_val/images \
-    --masks_dir data/suim/train_val/masks
+    --train_split data/train.txt \
+    --val_split data/val.txt \
+    --images_dir data/images \
+    --masks_dir data/masks
 ````
 
 Good luck with your underwater semantic segmentation! 🌊🤖
