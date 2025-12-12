@@ -93,7 +93,8 @@ def main(args):
     
     # Datasets
     print("Loading datasets...")
-    train_dataset = SUIMDataset("data/train.txt", transform=train_transforms)
+    print(f"Data augmentation: {'enabled' if args.augment else 'disabled'}")
+    train_dataset = SUIMDataset("data/train.txt", transform=train_transforms if args.augment else val_transforms)
     val_dataset = SUIMDataset("data/val.txt", transform=val_transforms)
     
     train_loader = DataLoader(
@@ -194,6 +195,8 @@ if __name__ == "__main__":
     parser.add_argument("--class_weights", action="store_true", default=True)
     parser.add_argument("--aux_weight", type=float, default=0.4, 
                        help="Weight for auxiliary deep supervision losses")
+    parser.add_argument("--augment", action="store_true", default=True, help="Use data augmentation (default: True)")
+    parser.add_argument("--no-augment", dest="augment", action="store_false", help="Disable data augmentation")
     
     args = parser.parse_args()
     main(args)

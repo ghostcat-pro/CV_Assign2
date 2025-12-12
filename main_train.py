@@ -8,10 +8,12 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from models.unet_resattn import UNetResAttn
+from models.unet_resattn_v2 import UNetResAttnV2
+from models.unet_resattn_v3 import UNetResAttnV3
 from models.suimnet import SUIMNet
 from models.deeplab_resnet import get_deeplabv3
 from models.uwsegformer import UWSegFormer
-from datasets.suim_dataset import SUIMDataset
+from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import train_transforms, val_transforms
 from training.train import train_one_epoch, validate
 from training.loss import DiceCELoss
@@ -23,6 +25,10 @@ def get_model(name, num_classes=8, backbone=None):
     """Load model by name."""
     if name == "unet_resattn":
         return UNetResAttn(in_ch=3, out_ch=num_classes, base_ch=64)
+    elif name == "unet_resattn_v2":
+        return UNetResAttnV2(in_ch=3, out_ch=num_classes, base_ch=64, deep_supervision=True)
+    elif name == "unet_resattn_v3":
+        return UNetResAttnV3(in_ch=3, out_ch=num_classes, pretrained=True)
     elif name == "suimnet":
         return SUIMNet(in_ch=3, out_ch=num_classes, base=32)
     elif name == "deeplabv3":
@@ -40,17 +46,21 @@ def main(args):
     
     # Datasets
     print(f"\nLoading datasets...")
+    print(f"Data augmentation: {'enabled' if args.augment else 'disabled'}")
+    print(f"Class mode: {'6 classes (merged)' if args.merge_classes else '8 classes (original)'}")
     train_dataset = SUIMDataset(
         split_file=args.train_split,
         images_dir=args.images_dir,
         masks_dir=args.masks_dir,
-        transform=train_transforms if args.augment else val_transforms
+        transform=train_transforms if args.augment else val_transforms,
+        merge_classes=args.merge_classes
     )
     val_dataset = SUIMDataset(
         split_file=args.val_split,
         images_dir=args.images_dir,
         masks_dir=args.masks_dir,
-        transform=val_transforms
+        transform=val_transforms,
+        merge_classes=args.merge_classes
     )
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, 
@@ -110,9 +120,11 @@ def main(args):
         # Save best model
         if val_iou > best_iou:
             best_iou = val_iou
-            save_path = f"checkpoints/{args.model}_{'aug' if args.augment else 'noaug'}_best.pth"
+            class_mode = "6cls" if args.merge_classes else "8cls"
+            aug_mode = "aug" if args.augment else "noaug"
+            save_path = f"checkpoints/{args.model}_{class_mode}_{aug_mode}_best.pth"
             save_checkpoint(model, optimizer, epoch, best_iou, save_path)
-            print(f"  → Saved best model: {save_path} (mIoU: {best_iou:.4f})")
+            print(f" Saved best model: {save_path} (mIoU: {best_iou:.4f})")
     
     print("=" * 70)
     print(f"Training complete! Best val mIoU: {best_iou:.4f}")
@@ -122,8 +134,8 @@ def main(args):
     final_miou, per_class = evaluate_loader(model, val_loader, device, args.num_classes)
     print(f"mIoU: {final_miou:.4f}")
     print("Per-class IoU:")
-    from datasets.suim_dataset import CLASS_NAMES
-    for i, (name, iou) in enumerate(zip(CLASS_NAMES, per_class)):
+    class_names = CLASS_NAMES_MERGED if args.merge_classes else CLASS_NAMES
+    for i, (name, iou) in enumerate(zip(class_names, per_class)):
         print(f"  {name:20s}: {iou:.4f}")
 
 if __name__ == "__main__":
@@ -136,19 +148,31 @@ if __name__ == "__main__":
     parser.add_argument("--masks_dir", default="data/masks")
     
     # Model
-    parser.add_argument("--model", choices=["unet_resattn", "suimnet", "deeplabv3", "uwsegformer"],
+    parser.add_argument("--model", choices=["unet_resattn", "unet_resattn_v2", "unet_resattn_v3", 
+                                           "suimnet", "deeplabv3", "uwsegformer"],
                        default="unet_resattn", help="Model architecture")
     parser.add_argument("--backbone", type=str, default=None,
-                       help="Backbone for uwsegformer. ResNet: resnet18/34/50/101, MiT: mit_b0/b1/b2/b3/b4/b5")
-    parser.add_argument("--num_classes", type=int, default=8)
+                       help="Backbone for uwsegformer (default: resnet50). "
+                            "ResNet backbones: resnet18/34/50/101 | "
+                            "MiT backbones: mit_b0 (always available), mit_b1/b2/b3/b4/b5 (if installed)")
+    parser.add_argument("--merge-classes", action="store_true", default=False,
+                       help="Merge background, plant, and sea_floor_rock into one class (6 classes instead of 8)")
+    parser.add_argument("--num_classes", type=int, default=None, 
+                       help="Number of classes (auto-set to 6 if --merge-classes, else 8)")
     
     # Training
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--augment", action="store_true", help="Use data augmentation")
+    parser.add_argument("--augment", action="store_true", default=True, help="Use data augmentation (default: True)")
+    parser.add_argument("--no-augment", dest="augment", action="store_false", help="Disable data augmentation")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--resume", type=str, default=None, help="Path to checkpoint to resume from")
     
     args = parser.parse_args()
+    
+    # Auto-set num_classes if not explicitly provided
+    if args.num_classes is None:
+        args.num_classes = 6 if args.merge_classes else 8
+    
     main(args)

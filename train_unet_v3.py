@@ -124,7 +124,8 @@ def main(args):
     
     # Load datasets
     print("Loading datasets...")
-    train_dataset = SUIMDataset('data/train.txt', transform=train_transforms_384)
+    print(f"Data augmentation: {'enabled' if args.augment else 'disabled'}")
+    train_dataset = SUIMDataset('data/train.txt', transform=train_transforms_384 if args.augment else val_transforms_384)
     val_dataset = SUIMDataset('data/val.txt', transform=val_transforms_384)
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, 
@@ -236,6 +237,8 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
     parser.add_argument('--weight_decay', type=float, default=1e-4, help='Weight decay')
     parser.add_argument('--grad_clip', type=float, default=1.0, help='Gradient clipping')
+    parser.add_argument('--augment', action='store_true', default=True, help='Use data augmentation (default: True)')
+    parser.add_argument('--no-augment', dest='augment', action='store_false', help='Disable data augmentation')
     
     # Loss parameters
     parser.add_argument('--use_focal', action='store_true', default=True, 

@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from models.unet_resattn import UNetResAttn
 from models.suimnet import SUIMNet
 from models.deeplab_resnet import get_deeplabv3
-from datasets.suim_dataset import SUIMDataset, CLASS_NAMES
+from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import val_transforms
 from training.eval import evaluate_loader
 from training.utils import load_checkpoint, count_parameters
@@ -32,11 +32,13 @@ def main(args):
     
     # Test dataset
     print(f"\nLoading test dataset...")
+    print(f"Class mode: {'6 classes (merged)' if args.merge_classes else '8 classes (original)'}")
     test_dataset = SUIMDataset(
         split_file=args.test_split,
         images_dir=args.images_dir,
         masks_dir=args.masks_dir,
-        transform=val_transforms
+        transform=val_transforms,
+        merge_classes=args.merge_classes
     )
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, 
                              shuffle=False, num_workers=args.num_workers)
@@ -66,7 +68,8 @@ def main(args):
     print(f"\nmean IoU: {miou:.4f}")
     print("\nPer-class IoU:")
     print("-" * 50)
-    for name, iou in zip(CLASS_NAMES, per_class):
+    class_names = CLASS_NAMES_MERGED if args.merge_classes else CLASS_NAMES
+    for name, iou in zip(class_names, per_class):
         print(f"{name:25s}: {iou:.4f}")
     print("=" * 70)
 
@@ -82,11 +85,19 @@ if __name__ == "__main__":
     parser.add_argument("--model", choices=["unet_resattn", "suimnet", "deeplabv3"],
                        required=True, help="Model architecture")
     parser.add_argument("--checkpoint", type=str, help="Path to model checkpoint")
-    parser.add_argument("--num_classes", type=int, default=8)
+    parser.add_argument("--merge-classes", action="store_true", default=False,
+                       help="Merge background, plant, and sea_floor_rock into one class (6 classes)")
+    parser.add_argument("--num_classes", type=int, default=None,
+                       help="Number of classes (auto-set to 6 if --merge-classes, else 8)")
     
     # Eval
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--num_workers", type=int, default=4)
     
     args = parser.parse_args()
+    
+    # Auto-set num_classes if not explicitly provided
+    if args.num_classes is None:
+        args.num_classes = 6 if args.merge_classes else 8
+    
     main(args)

@@ -12,12 +12,12 @@ from models.unet_resattn import UNetResAttn
 from models.unet_resattn_v2 import UNetResAttnV2
 from models.unet_resattn_v3 import UNetResAttnV3
 from models.deeplab_resnet import get_deeplabv3
-from datasets.suim_dataset import SUIMDataset
+from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import val_transforms
 from training.metrics import evaluate_model_full
 
 
-CLASS_NAMES = [
+CLASS_NAMES_DISPLAY = [
     "Background",
     "Diver", 
     "Plant",
@@ -26,6 +26,15 @@ CLASS_NAMES = [
     "Reef/Invertebrate",
     "Fish/Vertebrate",
     "Sea-floor/Rock"
+]
+
+CLASS_NAMES_MERGED_DISPLAY = [
+    "Background/Plant/Seafloor",
+    "Diver",
+    "Wreck",
+    "Robot",
+    "Reef/Invertebrate",
+    "Fish/Vertebrate"
 ]
 
 
@@ -70,14 +79,18 @@ def load_model(model_name, checkpoint_path, device, num_classes=8):
     return model
 
 
-def evaluate_all_models(test_file='data/test.txt', batch_size=8):
+def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=False):
     """Evaluate all trained models with IoU and F-score"""
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}\n")
     
+    num_classes = 6 if merge_classes else 8
+    class_names_display = CLASS_NAMES_MERGED_DISPLAY if merge_classes else CLASS_NAMES_DISPLAY
+    print(f"Class mode: {'6 classes (merged)' if merge_classes else '8 classes (original)'}\n")
+    
     # Load test dataset
-    test_dataset = SUIMDataset(test_file, transform=val_transforms)
+    test_dataset = SUIMDataset(test_file, transform=val_transforms, merge_classes=merge_classes)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, 
                             shuffle=False, num_workers=4)
     print(f"Test set: {len(test_dataset)} images\n")
@@ -132,11 +145,12 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8):
             model = load_model(
                 model_info['model_name'],
                 model_info['checkpoint'],
-                device
+                device,
+                num_classes=num_classes
             )
             
             # Evaluate with both metrics
-            metrics = evaluate_model_full(model, test_loader, device, num_classes=8)
+            metrics = evaluate_model_full(model, test_loader, device, num_classes=num_classes)
             
             results.append({
                 'name': model_info['name'],
@@ -232,8 +246,8 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8):
             f.write(f"{name:<25} {iou:>6.2f}%         {fscore:>6.2f}%\n")
         f.write("-" * 60 + "\n\n")
         
-        f.write("Per-Class IoU (%):\n")
-        for i, class_name in enumerate(CLASS_NAMES):
+        f.write("\n\nPer-Class IoU (%):\n")
+        for i, class_name in enumerate(class_names_display):
             f.write(f"\n{class_name}:\n")
             for result in results:
                 iou = result['metrics']['iou_per_class'][i]
@@ -241,7 +255,7 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8):
                     f.write(f"  {result['name']:<25} {iou*100:>6.2f}%\n")
         
         f.write("\n\nPer-Class F-score (%):\n")
-        for i, class_name in enumerate(CLASS_NAMES):
+        for i, class_name in enumerate(class_names_display):
             f.write(f"\n{class_name}:\n")
             for result in results:
                 fscore = result['metrics']['fscore_per_class'][i]
@@ -260,7 +274,9 @@ if __name__ == "__main__":
                        help='Path to test split file')
     parser.add_argument('--batch_size', type=int, default=8,
                        help='Batch size for evaluation')
+    parser.add_argument('--merge-classes', action='store_true', default=False,
+                       help='Merge background, plant, and sea_floor_rock into one class (6 classes)')
     
     args = parser.parse_args()
     
-    evaluate_all_models(args.test_file, args.batch_size)
+    evaluate_all_models(args.test_file, args.batch_size, args.merge_classes)
