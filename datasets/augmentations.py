@@ -2,7 +2,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 train_transforms = A.Compose([
-    A.Resize(256, 256),  # Square size to handle both landscape and portrait orientations
+    A.Resize(384, 384),  # Match model input size (384x384 for ResNet-based models)
     A.HorizontalFlip(p=0.5),
     A.VerticalFlip(p=0.2),
     A.RandomRotate90(p=0.5),
@@ -23,7 +23,7 @@ train_transforms = A.Compose([
 ])
 
 val_transforms = A.Compose([
-    A.Resize(256, 256),  # Square size to handle both landscape and portrait orientations
+    A.Resize(384, 384),  # Match model input size (384x384 for ResNet-based models)
     A.Normalize(),
     ToTensorV2()
 ])

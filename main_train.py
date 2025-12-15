@@ -10,13 +10,14 @@ from torch.utils.data import DataLoader
 from models.unet_resattn import UNetResAttn
 from models.unet_resattn_v2 import UNetResAttnV2
 from models.unet_resattn_v3 import UNetResAttnV3
+from models.unet_resattn_v4 import UNetResAttnV4
 from models.suimnet import SUIMNet
 from models.deeplab_resnet import get_deeplabv3
 from models.uwsegformer import UWSegFormer
 from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import train_transforms, val_transforms
 from training.train import train_one_epoch, validate
-from training.loss import DiceCELoss
+from training.loss import DiceCELoss, V4DeepSupervisionLoss
 from training.eval import evaluate_loader
 from training.utils import save_checkpoint, load_checkpoint, count_parameters
 from training.device_utils import get_device
@@ -29,6 +30,8 @@ def get_model(name, num_classes=8, backbone=None):
         return UNetResAttnV2(in_ch=3, out_ch=num_classes, base_ch=64, deep_supervision=True)
     elif name == "unet_resattn_v3":
         return UNetResAttnV3(in_ch=3, out_ch=num_classes, pretrained=True)
+    elif name == "unet_resattn_v4":
+        return UNetResAttnV4(in_ch=3, out_ch=num_classes, pretrained=True, deep_supervision=True)
     elif name == "suimnet":
         return SUIMNet(in_ch=3, out_ch=num_classes, base=32)
     elif name == "deeplabv3":
@@ -77,7 +80,15 @@ def main(args):
     print(f"Parameters: {count_parameters(model):,}")
     
     # Loss & Optimizer
-    criterion = DiceCELoss(dice_weight=0.5)
+    # Use specialized loss for V4 with deep supervision
+    if args.model == "unet_resattn_v4":
+        # Class weights for SUIM - boost hard classes (Diver, Plant)
+        # Format: [Background, Human_diver, Aquatic_plants, Wreck, Robot, Reefs_invertebrates, Sea_floor_rocks, Fish_vertebrates]
+        class_weights = torch.tensor([0.1, 2.5, 3.0, 1.5, 1.5, 1.0, 1.2, 1.0]).to(device) if args.num_classes == 8 else None
+        criterion = V4DeepSupervisionLoss(aux_weight=0.4, edge_weight=0.1, alpha=class_weights, gamma=2.5)
+        print("Using V4DeepSupervisionLoss with class weights and deep supervision")
+    else:
+        criterion = DiceCELoss(dice_weight=0.5)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='max', factor=0.5, patience=5
@@ -148,7 +159,7 @@ if __name__ == "__main__":
     parser.add_argument("--masks_dir", default="data/masks")
     
     # Model
-    parser.add_argument("--model", choices=["unet_resattn", "unet_resattn_v2", "unet_resattn_v3", 
+    parser.add_argument("--model", choices=["unet_resattn", "unet_resattn_v2", "unet_resattn_v3", "unet_resattn_v4",
                                            "suimnet", "deeplabv3", "uwsegformer"],
                        default="unet_resattn", help="Model architecture")
     parser.add_argument("--backbone", type=str, default=None,

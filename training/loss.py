@@ -210,3 +210,88 @@ class EdgeLearningLoss(nn.Module):
             raise ValueError(f"Unknown loss_type: {self.loss_type}. Use 'mse' or 'l1'.")
 
         return self.weight * loss
+
+
+class V4DeepSupervisionLoss(nn.Module):
+    """
+    Loss function for UNet-ResAttn-V4 with deep supervision and edge enhancement.
+    
+    Combines:
+    - Main segmentation loss (Dice + Focal)
+    - Auxiliary classifier losses (2x)
+    - Edge map loss (binary cross entropy)
+    
+    Args:
+        aux_weight: Weight for auxiliary outputs (default: 0.4)
+        edge_weight: Weight for edge map loss (default: 0.1)
+        alpha: Class weights for focal loss (None or list/tensor)
+        gamma: Focal loss gamma parameter (default: 2.5)
+    """
+    def __init__(self, aux_weight=0.4, edge_weight=0.1, alpha=None, gamma=2.5):
+        super().__init__()
+        self.aux_weight = aux_weight
+        self.edge_weight = edge_weight
+        
+        # Main loss: Dice + Focal (better for underwater imbalance)
+        self.main_loss = DiceFocalLoss(dice_weight=0.4, alpha=alpha, gamma=gamma)
+        
+        # Auxiliary losses: same as main
+        self.aux_loss = DiceFocalLoss(dice_weight=0.4, alpha=alpha, gamma=gamma)
+        
+        # Edge loss: binary cross entropy
+        self.edge_loss = nn.BCELoss()
+    
+    def _compute_edge_target(self, masks):
+        """Compute edge ground truth from segmentation masks using Sobel-like operator"""
+        # Convert masks to one-hot
+        b, h, w = masks.shape
+        device = masks.device
+        
+        # Simple edge detection: differences in neighboring pixels
+        edges = torch.zeros(b, 1, h, w, device=device)
+        
+        # Horizontal edges
+        edges[:, :, :-1, :] += (masks[:, :-1, :] != masks[:, 1:, :]).float().unsqueeze(1)
+        # Vertical edges
+        edges[:, :, :, :-1] += (masks[:, :, :-1] != masks[:, :, 1:]).float().unsqueeze(1)
+        
+        # Clamp to [0, 1]
+        edges = torch.clamp(edges, 0, 1)
+        
+        return edges
+    
+    def forward(self, outputs, targets):
+        """
+        Args:
+            outputs: Tuple of (main_out, aux1, aux2, edge_map) during training,
+                    or just main_out during evaluation
+            targets: Ground truth masks (B, H, W)
+        """
+        if isinstance(outputs, tuple):
+            # Training mode with deep supervision
+            main_out, aux1, aux2, edge_map = outputs
+            
+            # Main segmentation loss
+            main_loss = self.main_loss(main_out, targets)
+            
+            # Auxiliary losses
+            aux1_loss = self.aux_loss(aux1, targets)
+            aux2_loss = self.aux_loss(aux2, targets)
+            
+            # Edge loss
+            edge_target = self._compute_edge_target(targets)
+            # Match edge_map size to edge_target
+            if edge_map.shape[2:] != edge_target.shape[2:]:
+                edge_target = F.interpolate(edge_target, size=edge_map.shape[2:], 
+                                           mode='bilinear', align_corners=False)
+            edge_loss_val = self.edge_loss(edge_map, edge_target)
+            
+            # Combine losses
+            total_loss = (main_loss + 
+                         self.aux_weight * (aux1_loss + aux2_loss) + 
+                         self.edge_weight * edge_loss_val)
+            
+            return total_loss
+        else:
+            # Evaluation mode - only main output
+            return self.main_loss(outputs, targets)

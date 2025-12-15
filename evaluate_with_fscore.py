@@ -11,7 +11,9 @@ from models.suimnet import SUIMNet
 from models.unet_resattn import UNetResAttn
 from models.unet_resattn_v2 import UNetResAttnV2
 from models.unet_resattn_v3 import UNetResAttnV3
+from models.unet_resattn_v4 import UNetResAttnV4
 from models.deeplab_resnet import get_deeplabv3
+from models.uwsegformer import UWSegFormer
 from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import val_transforms
 from training.metrics import evaluate_model_full
@@ -50,8 +52,12 @@ def load_model(model_name, checkpoint_path, device, num_classes=8):
         model = UNetResAttnV2(in_ch=3, out_ch=num_classes, deep_supervision=True)
     elif model_name == 'unet_resattn_v3':
         model = UNetResAttnV3(in_ch=3, out_ch=num_classes, pretrained=False)
+    elif model_name == 'unet_resattn_v4':
+        model = UNetResAttnV4(in_ch=3, out_ch=num_classes, pretrained=False, deep_supervision=True)
     elif model_name == 'deeplabv3':
         model = get_deeplabv3(num_classes=num_classes, pretrained=False)
+    elif model_name == 'uwsegformer':
+        model = UWSegFormer(backbone='resnet50', num_classes=num_classes, pretrained=False)
     else:
         raise ValueError(f"Unknown model: {model_name}")
     
@@ -95,37 +101,50 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
                             shuffle=False, num_workers=4)
     print(f"Test set: {len(test_dataset)} images\n")
     
-    # Models to evaluate
+    # Models to evaluate (checkpoint paths include class mode)
+    class_mode = "6cls" if merge_classes else "8cls"
     models_to_eval = [
         {
             'name': 'SUIM-Net',
             'model_name': 'suimnet',
-            'checkpoint': 'checkpoints/suimnet_aug_best.pth',
+            'checkpoint': f'checkpoints/suimnet_{class_mode}_aug_best.pth',
             'resolution': 256
         },
         {
             'name': 'UNet-ResAttn',
             'model_name': 'unet_resattn',
-            'checkpoint': 'checkpoints/unet_resattn_aug_best.pth',
+            'checkpoint': f'checkpoints/unet_resattn_{class_mode}_aug_best.pth',
             'resolution': 256
         },
         {
             'name': 'UNet-ResAttn-V2',
             'model_name': 'unet_resattn_v2',
-            'checkpoint': 'checkpoints/unet_resattn_v2_best.pth',
+            'checkpoint': f'checkpoints/unet_resattn_v2_{class_mode}_aug_best.pth',
             'resolution': 256
         },
         {
             'name': 'UNet-ResAttn-V3',
             'model_name': 'unet_resattn_v3',
-            'checkpoint': 'checkpoints/unet_resattn_v3_best.pth',
+            'checkpoint': f'checkpoints/unet_resattn_v3_{class_mode}_aug_best.pth',
+            'resolution': 384
+        },
+        {
+            'name': 'UNet-ResAttn-V4',
+            'model_name': 'unet_resattn_v4',
+            'checkpoint': f'checkpoints/unet_resattn_v4_{class_mode}_aug_best.pth',
             'resolution': 384
         },
         {
             'name': 'DeepLabV3-ResNet50',
             'model_name': 'deeplabv3',
-            'checkpoint': 'checkpoints/deeplabv3_aug_best.pth',
+            'checkpoint': f'checkpoints/deeplabv3_{class_mode}_aug_best.pth',
             'resolution': 256
+        },
+        {
+            'name': 'UWSegFormer',
+            'model_name': 'uwsegformer',
+            'checkpoint': f'checkpoints/uwsegformer_{class_mode}_aug_best.pth',
+            'resolution': 384
         }
     ]
     
@@ -188,7 +207,7 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
     print()
     
     # Per-class IoU table
-    print("Per-Class IoU (%):")
+    print("Per-Class IoU (%):")  
     print("-" * 100)
     header = f"{'Class':<20}"
     for result in results:
@@ -196,7 +215,7 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
     print(header)
     print("-" * 100)
     
-    for i, class_name in enumerate(CLASS_NAMES):
+    for i, class_name in enumerate(class_names_display):
         row = f"{class_name:<20}"
         for result in results:
             iou = result['metrics']['iou_per_class'][i]
@@ -209,7 +228,7 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
     print()
     
     # Per-class F-score table
-    print("Per-Class F-score (%):")
+    print("Per-Class F-score (%):")  
     print("-" * 100)
     header = f"{'Class':<20}"
     for result in results:
@@ -217,7 +236,7 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
     print(header)
     print("-" * 100)
     
-    for i, class_name in enumerate(CLASS_NAMES):
+    for i, class_name in enumerate(class_names_display):
         row = f"{class_name:<20}"
         for result in results:
             fscore = result['metrics']['fscore_per_class'][i]
