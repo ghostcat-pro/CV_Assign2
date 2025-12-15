@@ -7,6 +7,8 @@ ENV/
 SUIM/
 UWSegFormer-main/
 
+sam3-main/
+
 # Python
 __pycache__/
 *.py[cod]
