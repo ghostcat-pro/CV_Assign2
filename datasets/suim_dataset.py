@@ -27,7 +27,6 @@ CLASS_NAMES = [
 ]
 
 CLASS_NAMES_MERGED = [
-    "background_plant_seafloor",  # merged: background(0), plant(2), sea_floor_rock(7)
     "diver",                       # originally 1
     "wreck",                       # originally 3
     "robot",                       # originally 4
@@ -40,8 +39,8 @@ def mask_rgb_to_class(mask_rgb: np.ndarray, merge_classes: bool = False) -> np.n
     
     Args:
         mask_rgb: RGB mask image (H, W, 3)
-        merge_classes: If True, merge background(0), plant(2), and sea_floor_rock(7) 
-                      into class 0, reducing total classes from 8 to 6.
+        merge_classes: If True, ignore background(0), plant(2), and sea_floor_rock(7),
+                      reducing total classes from 8 to 5 (only object classes).
     
     Returns:
         Class indices mask (H, W)
@@ -57,10 +56,10 @@ def mask_rgb_to_class(mask_rgb: np.ndarray, merge_classes: bool = False) -> np.n
     result = mapped[inv].reshape(h, w)
     
     if merge_classes:
-        # Merge background(0), plant(2), and sea_floor_rock(7) -> 0
-        # Remap remaining classes: 1->1, 3->2, 4->3, 5->4, 6->5
-        remapping = {0: 0, 1: 1, 2: 0, 3: 2, 4: 3, 5: 4, 6: 5, 7: 0}
-        result_merged = np.zeros_like(result)
+        # Ignore background(0), plant(2), and sea_floor_rock(7) by setting them to 255 (ignore index)
+        # Remap remaining classes: 1->0, 3->1, 4->2, 5->3, 6->4 (5 classes total)
+        remapping = {0: 255, 1: 0, 2: 255, 3: 1, 4: 2, 5: 3, 6: 4, 7: 255}
+        result_merged = np.full_like(result, 255, dtype=np.uint8)
         for old_cls, new_cls in remapping.items():
             result_merged[result == old_cls] = new_cls
         result = result_merged
@@ -77,8 +76,8 @@ class SUIMDataset(Dataset):
             images_dir: Directory containing images
             masks_dir: Directory containing masks
             transform: Albumentations transform pipeline
-            merge_classes: If True, reduce from 8 to 6 classes by merging 
-                          background, plant, and sea_floor_rock into one class
+            merge_classes: If True, reduce from 8 to 5 classes by ignoring 
+                          background, plant, and sea_floor_rock (set to ignore index 255)
         """
         self.images_dir = Path(images_dir)
         self.masks_dir = Path(masks_dir)

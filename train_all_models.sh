@@ -1,9 +1,9 @@
 #!/bin/bash
-# Script to train all 3 models sequentially
+# Script to train all models sequentially
+# Configured to run with MERGED CLASSES (5 classes) and WITHOUT augmentation
 # Run with: bash train_all_models.sh
-# Run without augmentation: bash train_all_models.sh --no-augment
-# Run with merged classes (6 classes): bash train_all_models.sh --merge-classes
-# Combine flags: bash train_all_models.sh --no-augment --merge-classes
+# Override with full augmentation: bash train_all_models.sh --augment
+# Override with 8 classes: bash train_all_models.sh --no-merge-classes
 
 # Activate virtual environment (Windows path)
 source venv/Scripts/activate
@@ -11,24 +11,30 @@ source venv/Scripts/activate
 # Create a log directory
 mkdir -p logs
 
-# Parse command line arguments
-AUG_FLAG=""
-MERGE_FLAG=""
+# Default: no augmentation, merged classes (5 classes)
+AUG_FLAG="--no-augment"
+MERGE_FLAG="--merge-classes"
+
+# Parse command line arguments to override defaults
 for arg in "$@"; do
-    if [ "$arg" = "--no-augment" ]; then
-        AUG_FLAG="--no-augment"
-        echo "Running WITHOUT data augmentation"
-    elif [ "$arg" = "--merge-classes" ]; then
-        MERGE_FLAG="--merge-classes"
-        echo "Running with MERGED classes (6 classes instead of 8)"
+    if [ "$arg" = "--augment" ]; then
+        AUG_FLAG=""
+        echo "Override: Running WITH data augmentation"
+    elif [ "$arg" = "--no-merge-classes" ]; then
+        MERGE_FLAG=""
+        echo "Override: Running with ORIGINAL classes (8 classes)"
     fi
 done
 
 if [ -z "$AUG_FLAG" ]; then
-    echo "Running WITH data augmentation (default)"
+    echo "Running WITH data augmentation"
+else
+    echo "Running WITHOUT data augmentation (DEFAULT)"
 fi
 if [ -z "$MERGE_FLAG" ]; then
     echo "Running with ORIGINAL classes (8 classes)"
+else
+    echo "Running with MERGED classes (5 classes, DEFAULT)"
 fi
 
 # Get current timestamp
@@ -46,31 +52,49 @@ train_model() {
     local model_name=$1
     local epochs=$2
     local batch_size=$3
+    local backbone=$4  # Optional backbone parameter
+    
+    local display_name="$model_name"
+    if [ -n "$backbone" ]; then
+        display_name="$model_name (backbone: $backbone)"
+    fi
     
     echo "========================================" | tee -a "$LOG_FILE"
-    echo "Training: $model_name" | tee -a "$LOG_FILE"
+    echo "Training: $display_name" | tee -a "$LOG_FILE"
     echo "Epochs: $epochs | Batch Size: $batch_size" | tee -a "$LOG_FILE"
     echo "Started at: $(date)" | tee -a "$LOG_FILE"
     echo "========================================" | tee -a "$LOG_FILE"
     
-    python main_train.py \
-        --model "$model_name" \
-        --epochs "$epochs" \
-        --batch_size "$batch_size" \
-        $AUG_FLAG \
-        $MERGE_FLAG \
-        2>&1 | tee -a "$LOG_FILE"
+    # Build command with optional backbone
+    if [ -n "$backbone" ]; then
+        python main_train.py \
+            --model "$model_name" \
+            --backbone "$backbone" \
+            --epochs "$epochs" \
+            --batch_size "$batch_size" \
+            $AUG_FLAG \
+            $MERGE_FLAG \
+            2>&1 | tee -a "$LOG_FILE"
+    else
+        python main_train.py \
+            --model "$model_name" \
+            --epochs "$epochs" \
+            --batch_size "$batch_size" \
+            $AUG_FLAG \
+            $MERGE_FLAG \
+            2>&1 | tee -a "$LOG_FILE"
+    fi
     
     exit_code=${PIPESTATUS[0]}
     
     if [ $exit_code -eq 0 ]; then
         echo "" | tee -a "$LOG_FILE"
-        echo "✓ $model_name training completed successfully!" | tee -a "$LOG_FILE"
+        echo "✓ $display_name training completed successfully!" | tee -a "$LOG_FILE"
         echo "Completed at: $(date)" | tee -a "$LOG_FILE"
         echo "" | tee -a "$LOG_FILE"
     else
         echo "" | tee -a "$LOG_FILE"
-        echo "✗ $model_name training failed with exit code $exit_code" | tee -a "$LOG_FILE"
+        echo "✗ $display_name training failed with exit code $exit_code" | tee -a "$LOG_FILE"
         echo "Failed at: $(date)" | tee -a "$LOG_FILE"
         echo "" | tee -a "$LOG_FILE"
     fi
@@ -88,27 +112,20 @@ fi
 echo "================================" | tee -a "$LOG_FILE"
 echo "" | tee -a "$LOG_FILE"
 
-# 1. SUIM-Net (lightweight, fast)
-#train_model "suimnet" 50 8
+# 1. UWSegFormer V2 (enhanced with color restoration, multi-head attention - reduced batch size for stability)
+# train_model "uwsegformer_v2" 50 4
 
-# 2. UNet-ResAttn V1 (baseline custom architecture)
-#train_model "unet_resattn" 50 8
+# 2. Keras SUIM-Net with RSB backbone
+train_model "suimnet_keras" 50 8 "RSB"
 
-# 3. UNet-ResAttn V2 (with SE blocks, SPP, deep supervision)
-train_model "unet_resattn_v2" 60 8
+# 3. Keras SUIM-Net with VGG backbone
+train_model "suimnet_keras" 50 8 "VGG"
 
-# 4. UNet-ResAttn V3 (with pre-trained ResNet-50, focal loss, 384x384)
-train_model "unet_resattn_v3" 50 6
-
-# 5. DeepLabV3 (larger model, needs smaller batch)
+# 4. DeepLabV3 (larger model, needs smaller batch)
 train_model "deeplabv3" 30 4
 
-# 6. UWSegFormer with ResNet-50 backbone (default)
-train_model "uwsegformer" 50 8
-
-# Optional: Train UWSegFormer with MIT-B0 backbone
-# Uncomment the line below to also train with transformer backbone
-# train_model "uwsegformer --backbone mit_b0" 50 8
+# 5. UNet-ResAttn V4 (with pre-trained ResNet-50, edge detection, deep supervision)
+train_model "unet_resattn_v4" 50 6
 
 # Final summary
 echo "" | tee -a "$LOG_FILE"

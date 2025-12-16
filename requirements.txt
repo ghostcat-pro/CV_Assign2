@@ -4,3 +4,8 @@ opencv-python>=4.8.0
 albumentations>=1.3.0
 numpy>=1.24.0
 tqdm>=4.65.0
+matplotlib>=3.7.0
+
+# Keras/TensorFlow dependencies for SUIM-Net paper implementation
+tensorflow>=2.10.0,<2.16.0
+keras>=2.10.0,<3.0.0
