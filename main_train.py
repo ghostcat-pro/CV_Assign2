@@ -23,7 +23,7 @@ from training.loss import DiceCELoss, V4DeepSupervisionLoss, UWSegFormerV2DeepSu
 from training.eval import evaluate_loader
 from training.utils import save_checkpoint, load_checkpoint, count_parameters
 from training.device_utils import get_device
-# from training.visualization import TrainingPlotter  # Requires matplotlib
+from training.visualization import TrainingPlotter  # Requires matplotlib
 
 def get_model(name, num_classes=8, backbone=None):
     """Load model by name."""
@@ -310,7 +310,7 @@ def main(args):
             best_iou = val_iou
             class_mode = "5cls" if args.merge_classes else "8cls"
             aug_mode = "aug" if args.augment else "noaug"
-            save_path = f"checkpoints/{model_name}_{class_mode}_{aug_mode}_best.pth"
+            save_path = f"checkpoints/{args.model}_{class_mode}_{aug_mode}_best.pth"
             save_checkpoint(model, optimizer, epoch, best_iou, save_path)
             print(f" ★ Saved best model: {save_path} (mIoU: {best_iou:.4f})")
     
