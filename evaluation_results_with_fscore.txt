@@ -6,6 +6,8 @@ Overall Performance:
 ------------------------------------------------------------
 Model                     Mean IoU        Mean F-score   
 ------------------------------------------------------------
+SUIM-Net (Keras-VGG)        0.60%            nan%
+SUIM-Net (Keras-RSB)        0.04%            nan%
 SUIM-Net                   32.42%          41.15%
 UNet-ResAttn               33.65%          43.04%
 UNet-ResAttn-V2            32.41%          42.29%

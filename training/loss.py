@@ -72,7 +72,10 @@ class FocalLoss(nn.Module):
         
         # Get probability of the true class for each pixel (more memory efficient)
         # Instead of creating full one-hot, use gather to extract class probabilities
-        pt = probs.gather(1, targets.unsqueeze(1)).squeeze(1)
+        # Clamp targets to valid range before gather (ignore_index pixels will be handled by ce_loss)
+        targets_clamped = targets.clone()
+        targets_clamped[targets == self.ignore_index] = 0  # Use 0 as safe index for ignored pixels
+        pt = probs.gather(1, targets_clamped.unsqueeze(1)).squeeze(1)
         pt = torch.clamp(pt, 1e-7, 1.0)  # Numerical stability
         
         # Compute focal weight: (1 - pt)^gamma
@@ -85,7 +88,8 @@ class FocalLoss(nn.Module):
         if self.alpha is not None:
             if isinstance(self.alpha, torch.Tensor):
                 # Per-class alpha (already on correct device via register_buffer)
-                alpha_t = self.alpha[targets]
+                # Use clamped targets to avoid indexing errors
+                alpha_t = self.alpha[targets_clamped]
                 focal_loss = alpha_t * focal_loss
             else:
                 # Single alpha value
@@ -98,6 +102,48 @@ class FocalLoss(nn.Module):
             return focal_loss.sum()
         else:
             return focal_loss
+
+class BinaryCrossEntropyLoss(nn.Module):
+    """
+    Binary Cross Entropy Loss for multi-label segmentation.
+    Used in SUIM-Net paper with sigmoid activation.
+    Treats each class independently (multi-label, not mutually exclusive).
+    
+    Args:
+        ignore_index: Label to ignore (default: 255)
+    """
+    def __init__(self, ignore_index=255):
+        super().__init__()
+        self.ignore_index = ignore_index
+        self.bce = nn.BCELoss(reduction='none')
+    
+    def forward(self, probs, targets):
+        """
+        Args:
+            probs: (N, C, H, W) - Probabilities after sigmoid (0-1 range)
+            targets: (N, H, W) - Ground truth class indices
+        """
+        # Create valid mask
+        valid_mask = (targets != self.ignore_index)
+        
+        if valid_mask.sum() == 0:
+            return torch.tensor(0.0, device=probs.device)
+        
+        # Convert targets to one-hot (N, C, H, W)
+        num_classes = probs.shape[1]
+        targets_clamped = targets.clone()
+        targets_clamped[~valid_mask] = 0  # Set ignored pixels to 0 temporarily
+        targets_onehot = F.one_hot(targets_clamped, num_classes).permute(0, 3, 1, 2).float()
+        
+        # Compute BCE per pixel, per class
+        bce_loss = self.bce(probs, targets_onehot)
+        
+        # Apply valid mask (expand to match shape)
+        valid_mask_expanded = valid_mask.unsqueeze(1).expand_as(bce_loss)
+        bce_loss = bce_loss * valid_mask_expanded.float()
+        
+        # Average over valid pixels and classes
+        return bce_loss.sum() / (valid_mask_expanded.sum() + 1e-7)
 
 class DiceCELoss(nn.Module):
     def __init__(self, dice_weight=0.5, class_weights=None, ignore_index=255):

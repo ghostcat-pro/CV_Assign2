@@ -33,8 +33,9 @@ try:
     MIT_AVAILABLE = True
     print("MixTransformer (MiT) backbones available from UWSegFormer-main!")
 except ImportError:
-    print("Original MixTransformer not available. Using standalone MIT-B0 implementation.")
-    print("To use MiT-B1 through B5 backbones, ensure UWSegFormer-main folder exists.")
+    # print("Original MixTransformer not available. Using standalone MIT-B0 implementation.")
+    # print("To use MiT-B1 through B5 backbones, ensure UWSegFormer-main folder exists.")
+    a= 0
 
 # Always have MIT-B0 available (standalone implementation)
 mit_b0 = standalone_mit_b0

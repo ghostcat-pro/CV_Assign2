@@ -12,14 +12,14 @@ from models.unet_resattn import UNetResAttn
 from models.unet_resattn_v2 import UNetResAttnV2
 from models.unet_resattn_v3 import UNetResAttnV3
 from models.unet_resattn_v4 import UNetResAttnV4
-from models.suimnet import SUIMNet
+from models.suimnet_pytorch import SUIMNet
 from models.deeplab_resnet import get_deeplabv3
 from models.uwsegformer import UWSegFormer
 # from models.uwsegformer_v2 import UWSegFormerV2  # Not implemented yet
 from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import train_transforms, val_transforms
 from training.train import train_one_epoch, validate
-from training.loss import DiceCELoss, V4DeepSupervisionLoss  # , UWSegFormerV2DeepSupervisionLoss
+from training.loss import DiceCELoss, V4DeepSupervisionLoss, UWSegFormerV2DeepSupervisionLoss, BinaryCrossEntropyLoss
 from training.eval import evaluate_loader
 from training.utils import save_checkpoint, load_checkpoint, count_parameters
 from training.device_utils import get_device
@@ -36,7 +36,10 @@ def get_model(name, num_classes=8, backbone=None):
     elif name == "unet_resattn_v4":
         return UNetResAttnV4(in_ch=3, out_ch=num_classes, pretrained=True, deep_supervision=True)
     elif name == "suimnet":
-        return SUIMNet(in_ch=3, out_ch=num_classes, base=32)
+        # Use backbone to select RSB or VGG (default: RSB)
+        base = 'VGG' if backbone and backbone.upper() == 'VGG' else 'RSB'
+        pretrained_vgg = True if base == 'VGG' else False
+        return SUIMNet(base=base, in_channels=3, n_classes=num_classes, pretrained_vgg=pretrained_vgg)
     elif name == "suimnet_keras":
         # Return a flag to use Keras training pipeline
         return "KERAS_MODEL"
@@ -231,6 +234,12 @@ def main(args):
     model = model.to(device)
     print(f"Parameters: {count_parameters(model):,}")
     
+    # Track backbone for SUIMNet to include in checkpoint name
+    suimnet_backbone = None
+    if args.model == "suimnet":
+        suimnet_backbone = 'vgg' if args.backbone and args.backbone.upper() == 'VGG' else 'rsb'
+        print(f"SUIMNet backbone: {suimnet_backbone.upper()}")
+    
     # Loss & Optimizer
     # Use specialized loss for models with deep supervision
     if args.model == "unet_resattn_v4":
@@ -239,6 +248,10 @@ def main(args):
         class_weights = [0.1, 2.5, 3.0, 1.5, 1.5, 1.0, 1.2, 1.0] if args.num_classes == 8 else None
         criterion = V4DeepSupervisionLoss(aux_weight=0.4, edge_weight=0.1, alpha=class_weights, gamma=2.0)
         print("Using V4DeepSupervisionLoss with class weights and deep supervision")
+    elif args.model == "suimnet":
+        # Binary cross entropy for SUIMNet (matches paper's implementation with sigmoid)
+        criterion = BinaryCrossEntropyLoss()
+        print("Using BinaryCrossEntropyLoss (matching paper's implementation with sigmoid)")
     else:
         # Standard DiceCE loss for all other models
         criterion = DiceCELoss(dice_weight=0.5)
@@ -264,7 +277,7 @@ def main(args):
     class_mode = "5cls" if args.merge_classes else "8cls"
     aug_mode = "aug" if args.augment else "noaug"
     plot_name = f"{args.model}_{class_mode}_{aug_mode}_training"
-    # plotter = TrainingPlotter(save_dir="visualizations", plot_name=plot_name)  # Disabled - requires matplotlib
+    plotter = TrainingPlotter(save_dir="visualizations", plot_name=plot_name)
 
     # Training loop
     print(f"\nStarting training for {args.epochs} epochs (starting from epoch {start_epoch})...")
@@ -297,7 +310,7 @@ def main(args):
             best_iou = val_iou
             class_mode = "5cls" if args.merge_classes else "8cls"
             aug_mode = "aug" if args.augment else "noaug"
-            save_path = f"checkpoints/{args.model}_{class_mode}_{aug_mode}_best.pth"
+            save_path = f"checkpoints/{model_name}_{class_mode}_{aug_mode}_best.pth"
             save_checkpoint(model, optimizer, epoch, best_iou, save_path)
             print(f" ★ Saved best model: {save_path} (mIoU: {best_iou:.4f})")
     
@@ -343,10 +356,11 @@ if __name__ == "__main__":
                                            "suimnet", "suimnet_keras", "deeplabv3", "uwsegformer"],  # "uwsegformer_v2" not implemented
                        default="unet_resattn", help="Model architecture")
     parser.add_argument("--backbone", type=str, default=None,
-                       help="Backbone for uwsegformer (default: resnet50) or suimnet_keras (VGG/RSB). "
-                            "ResNet backbones: resnet18/34/50/101 | "
-                            "MiT backbones: mit_b0 (always available), mit_b1/b2/b3/b4/b5 (if installed) | "
-                            "Keras SUIM-Net: VGG (default) or RSB")
+                       help="Backbone for models. "
+                            "PyTorch SUIM-Net: RSB (default) or VGG | "
+                            "Keras SUIM-Net: VGG (default) or RSB | "
+                            "UWSegFormer: resnet18/34/50/101 (default: resnet50) | "
+                            "MiT backbones: mit_b0 (always available), mit_b1/b2/b3/b4/b5 (if installed)")
     parser.add_argument("--merge-classes", action="store_true", default=False,
                        help="Ignore background, plant, and sea_floor_rock (5 classes instead of 8)")
     parser.add_argument("--num_classes", type=int, default=None, 
