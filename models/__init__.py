@@ -9,7 +9,7 @@ from .unet_resattn_v4 import UNetResAttnV4
 from .suimnet import SUIMNet
 from .deeplab_resnet import get_deeplabv3
 from .uwsegformer import UWSegFormer, get_uwsegformer
-from .uwsegformer_v2 import UWSegFormerV2, get_uwsegformer_v2
+# from .uwsegformer_v2 import UWSegFormerV2, get_uwsegformer_v2  # TODO: Not implemented yet
 
 __all__ = [
     'UNetResAttn',
@@ -20,6 +20,6 @@ __all__ = [
     'get_deeplabv3',
     'UWSegFormer',
     'get_uwsegformer',
-    'UWSegFormerV2',
-    'get_uwsegformer_v2',
+    # 'UWSegFormerV2',  # TODO: Not implemented yet
+    # 'get_uwsegformer_v2',
 ]

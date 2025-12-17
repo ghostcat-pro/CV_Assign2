@@ -123,7 +123,6 @@ def main(args):
         mode='max',      # Maximize IoU
         factor=0.5,      # Reduce LR by half
         patience=5,      # Wait 5 epochs before reducing
-        verbose=True,
         min_lr=1e-7
     )
     

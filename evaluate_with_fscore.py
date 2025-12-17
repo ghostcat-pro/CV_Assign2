@@ -14,7 +14,7 @@ from models.unet_resattn_v3 import UNetResAttnV3
 from models.unet_resattn_v4 import UNetResAttnV4
 from models.deeplab_resnet import get_deeplabv3
 from models.uwsegformer import UWSegFormer
-from models.uwsegformer_v2 import UWSegFormerV2
+# from models.uwsegformer_v2 import UWSegFormerV2  # Not implemented yet
 from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import val_transforms
 from training.metrics import evaluate_model_full
@@ -59,8 +59,8 @@ def load_model(model_name, checkpoint_path, device, num_classes=8):
         model = get_deeplabv3(num_classes=num_classes, pretrained=False)
     elif model_name == 'uwsegformer':
         model = UWSegFormer(backbone='resnet50', num_classes=num_classes, pretrained=False)
-    elif model_name == 'uwsegformer_v2':
-        model = UWSegFormerV2(backbone='resnet50', num_classes=num_classes, pretrained=False, deep_supervision=True)
+    # elif model_name == 'uwsegformer_v2':
+    #     model = UWSegFormerV2(backbone='resnet50', num_classes=num_classes, pretrained=False, deep_supervision=True)
     else:
         raise ValueError(f"Unknown model: {model_name}")
     
@@ -105,7 +105,7 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
     print(f"Test set: {len(test_dataset)} images\n")
     
     # Models to evaluate (checkpoint paths include class mode)
-    class_mode = "6cls" if merge_classes else "8cls"
+    class_mode = "5cls" if merge_classes else "8cls"
     models_to_eval = [
         {
             'name': 'SUIM-Net',
@@ -122,13 +122,13 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
         {
             'name': 'UNet-ResAttn-V2',
             'model_name': 'unet_resattn_v2',
-            'checkpoint': f'checkpoints/unet_resattn_v2_{class_mode}_aug_best.pth',
+            'checkpoint': f'checkpoints/unet_resattn_v2_{class_mode}_noaug_best.pth',
             'resolution': 256
         },
         {
             'name': 'UNet-ResAttn-V3',
             'model_name': 'unet_resattn_v3',
-            'checkpoint': f'checkpoints/unet_resattn_v3_{class_mode}_aug_best.pth',
+            'checkpoint': f'checkpoints/unet_resattn_v3_{class_mode}_noaug_best.pth',
             'resolution': 384
         },
         {
@@ -148,13 +148,13 @@ def evaluate_all_models(test_file='data/test.txt', batch_size=8, merge_classes=F
             'model_name': 'uwsegformer',
             'checkpoint': f'checkpoints/uwsegformer_{class_mode}_aug_best.pth',
             'resolution': 384
-        },
-        {
-            'name': 'UWSegFormer-V2',
-            'model_name': 'uwsegformer_v2',
-            'checkpoint': f'checkpoints/uwsegformer_v2_{class_mode}_aug_best.pth',
-            'resolution': 384
         }
+        # {
+        #     'name': 'UWSegFormer-V2',
+        #     'model_name': 'uwsegformer_v2',
+        #     'checkpoint': f'checkpoints/uwsegformer_v2_{class_mode}_aug_best.pth',
+        #     'resolution': 384
+        # }
     ]
     
     results = []

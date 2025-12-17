@@ -1,0 +1,315 @@
+====================================================================================================
+COMPREHENSIVE EVALUATION RESULTS - ALL MODELS
+PyTorch + Keras | Augmentation + No-Augmentation Variants
+====================================================================================================
+
+Overall Performance:
+------------------------------------------------------------------------------------------
+Model                                    Params (M)   Mean IoU     Mean F-score
+------------------------------------------------------------------------------------------
+DeepLabV3-ResNet50 (Aug)                  42.00M       57.45%       67.09%
+UWSegFormer (Aug)                         30.24M       55.89%       65.26%
+UNet-ResAttn-V4 (Aug)                    138.15M       54.14%       62.90%
+DeepLabV3-ResNet50 (No Aug)               42.00M       54.06%       64.07%
+UWSegFormer (No Aug)                      30.24M       53.57%       62.05%
+UNet-ResAttn-V3 (No Aug)                  74.49M       52.85%       61.90%
+UNet-ResAttn-V4 (No Aug)                 138.15M       50.00%       59.71%
+UNet-ResAttn-V3 (Aug)                     74.49M       41.90%       49.46%
+UNet-ResAttn (Aug)                        32.96M       33.65%       43.04%
+SUIM-Net (PyTorch, Aug)                    7.76M       32.42%       41.15%
+UNet-ResAttn-V2 (No Aug)                  68.86M       32.41%       42.29%
+SUIM-Net Keras VGG (No Aug)               33.64M       14.35%       16.41%
+SUIM-Net Keras VGG (Aug)                  33.64M       14.09%       16.23%
+SUIM-Net Keras RSB (Aug)                  11.20M        6.74%        8.96%
+SUIM-Net Keras RSB (No Aug)               11.20M        6.36%        8.31%
+------------------------------------------------------------------------------------------
+
+
+Per-Class IoU (%):
+====================================================================================================
+
+Background:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  87.12%
+  UWSegFormer (Aug)                         85.52%
+  UNet-ResAttn-V4 (Aug)                     88.01%
+  DeepLabV3-ResNet50 (No Aug)               87.90%
+  UWSegFormer (No Aug)                      87.41%
+  UNet-ResAttn-V3 (No Aug)                  88.25%
+  UNet-ResAttn-V4 (No Aug)                  83.88%
+  UNet-ResAttn-V3 (Aug)                     85.93%
+  UNet-ResAttn (Aug)                        80.12%
+  SUIM-Net (PyTorch, Aug)                   78.67%
+  UNet-ResAttn-V2 (No Aug)                  78.29%
+  SUIM-Net Keras VGG (No Aug)               68.57%
+  SUIM-Net Keras VGG (Aug)                  68.46%
+  SUIM-Net Keras RSB (Aug)                  42.35%
+  SUIM-Net Keras RSB (No Aug)               44.68%
+
+Diver:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  42.03%
+  UWSegFormer (Aug)                         38.29%
+  UNet-ResAttn-V4 (Aug)                     32.33%
+  DeepLabV3-ResNet50 (No Aug)               40.78%
+  UWSegFormer (No Aug)                      32.42%
+  UNet-ResAttn-V3 (No Aug)                  41.03%
+  UNet-ResAttn-V4 (No Aug)                  40.12%
+  UNet-ResAttn (Aug)                         7.31%
+  UNet-ResAttn-V2 (No Aug)                  10.19%
+  SUIM-Net Keras VGG (No Aug)                1.63%
+  SUIM-Net Keras VGG (Aug)                   1.73%
+  SUIM-Net Keras RSB (Aug)                   0.68%
+  SUIM-Net Keras RSB (No Aug)                0.44%
+
+Plant:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  16.88%
+  UWSegFormer (Aug)                         18.60%
+  UNet-ResAttn-V4 (Aug)                     19.95%
+  DeepLabV3-ResNet50 (No Aug)               17.59%
+  UWSegFormer (No Aug)                      10.50%
+  UNet-ResAttn-V3 (No Aug)                  12.72%
+  UNet-ResAttn-V4 (No Aug)                   3.26%
+  UNet-ResAttn (Aug)                         6.35%
+  SUIM-Net (PyTorch, Aug)                    0.01%
+  UNet-ResAttn-V2 (No Aug)                  15.58%
+  SUIM-Net Keras VGG (No Aug)                9.22%
+  SUIM-Net Keras VGG (Aug)                   8.12%
+  SUIM-Net Keras RSB (Aug)                   0.00%
+  SUIM-Net Keras RSB (No Aug)                0.15%
+
+Wreck:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  60.92%
+  UWSegFormer (Aug)                         67.40%
+  UNet-ResAttn-V4 (Aug)                     62.11%
+  DeepLabV3-ResNet50 (No Aug)               59.43%
+  UWSegFormer (No Aug)                      62.36%
+  UNet-ResAttn-V3 (No Aug)                  60.93%
+  UNet-ResAttn-V4 (No Aug)                  56.35%
+  UNet-ResAttn-V3 (Aug)                     57.22%
+  UNet-ResAttn (Aug)                        31.70%
+  SUIM-Net (PyTorch, Aug)                   34.98%
+  UNet-ResAttn-V2 (No Aug)                  27.50%
+  SUIM-Net Keras VGG (No Aug)                0.51%
+  SUIM-Net Keras VGG (Aug)                   1.16%
+  SUIM-Net Keras RSB (Aug)                   0.00%
+  SUIM-Net Keras RSB (No Aug)                0.00%
+
+Robot:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  59.85%
+  UWSegFormer (Aug)                         61.38%
+  UNet-ResAttn-V4 (Aug)                     55.43%
+  DeepLabV3-ResNet50 (No Aug)               52.24%
+  UWSegFormer (No Aug)                      54.46%
+  UNet-ResAttn-V3 (No Aug)                  63.13%
+  UNet-ResAttn-V4 (No Aug)                  53.87%
+  UNet-ResAttn-V3 (Aug)                     46.93%
+  UNet-ResAttn (Aug)                        32.27%
+  SUIM-Net (PyTorch, Aug)                   39.41%
+  UNet-ResAttn-V2 (No Aug)                  29.98%
+  SUIM-Net Keras VGG (No Aug)                0.12%
+  SUIM-Net Keras VGG (Aug)                   0.71%
+  SUIM-Net Keras RSB (Aug)                   0.60%
+  SUIM-Net Keras RSB (No Aug)                0.15%
+
+Reef/Invertebrate:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  62.48%
+  UWSegFormer (Aug)                         62.00%
+  UNet-ResAttn-V4 (Aug)                     56.17%
+  DeepLabV3-ResNet50 (No Aug)               62.08%
+  UWSegFormer (No Aug)                      61.70%
+  UNet-ResAttn-V3 (No Aug)                  59.47%
+  UNet-ResAttn-V4 (No Aug)                  53.77%
+  UNet-ResAttn-V3 (Aug)                     56.96%
+  UNet-ResAttn (Aug)                        47.42%
+  SUIM-Net (PyTorch, Aug)                   48.88%
+  UNet-ResAttn-V2 (No Aug)                  42.21%
+  SUIM-Net Keras VGG (No Aug)               33.36%
+  SUIM-Net Keras VGG (Aug)                  31.39%
+  SUIM-Net Keras RSB (Aug)                   0.62%
+  SUIM-Net Keras RSB (No Aug)                1.04%
+
+Fish/Vertebrate:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  64.62%
+  UWSegFormer (Aug)                         51.90%
+  UNet-ResAttn-V4 (Aug)                     57.26%
+  DeepLabV3-ResNet50 (No Aug)               46.79%
+  UWSegFormer (No Aug)                      54.05%
+  UNet-ResAttn-V3 (No Aug)                  36.17%
+  UNet-ResAttn-V4 (No Aug)                  47.15%
+  UNet-ResAttn-V3 (Aug)                     28.53%
+  UNet-ResAttn (Aug)                        13.92%
+  SUIM-Net (PyTorch, Aug)                   10.43%
+  UNet-ResAttn-V2 (No Aug)                  12.97%
+  SUIM-Net Keras VGG (No Aug)                0.48%
+  SUIM-Net Keras VGG (Aug)                   0.34%
+  SUIM-Net Keras RSB (Aug)                   0.14%
+  SUIM-Net Keras RSB (No Aug)                0.05%
+
+Sea-floor/Rock:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  65.74%
+  UWSegFormer (Aug)                         61.99%
+  UNet-ResAttn-V4 (Aug)                     61.86%
+  DeepLabV3-ResNet50 (No Aug)               65.67%
+  UWSegFormer (No Aug)                      65.68%
+  UNet-ResAttn-V3 (No Aug)                  61.11%
+  UNet-ResAttn-V4 (No Aug)                  61.61%
+  UNet-ResAttn-V3 (Aug)                     59.59%
+  UNet-ResAttn (Aug)                        50.11%
+  SUIM-Net (PyTorch, Aug)                   46.98%
+  UNet-ResAttn-V2 (No Aug)                  42.56%
+  SUIM-Net Keras VGG (No Aug)                0.90%
+  SUIM-Net Keras VGG (Aug)                   0.81%
+  SUIM-Net Keras RSB (Aug)                   9.50%
+  SUIM-Net Keras RSB (No Aug)                4.37%
+
+
+Per-Class F-score (%):
+====================================================================================================
+
+Background:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  93.01%
+  UWSegFormer (Aug)                         91.82%
+  UNet-ResAttn-V4 (Aug)                     93.54%
+  DeepLabV3-ResNet50 (No Aug)               93.44%
+  UWSegFormer (No Aug)                      93.11%
+  UNet-ResAttn-V3 (No Aug)                  93.66%
+  UNet-ResAttn-V4 (No Aug)                  90.96%
+  UNet-ResAttn-V3 (Aug)                     92.35%
+  UNet-ResAttn (Aug)                        88.73%
+  SUIM-Net (PyTorch, Aug)                   87.83%
+  UNet-ResAttn-V2 (No Aug)                  87.49%
+  SUIM-Net Keras VGG (No Aug)               74.57%
+  SUIM-Net Keras VGG (Aug)                  74.50%
+  SUIM-Net Keras RSB (Aug)                  53.99%
+  SUIM-Net Keras RSB (No Aug)               56.29%
+
+Diver:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  52.92%
+  UWSegFormer (Aug)                         49.84%
+  UNet-ResAttn-V4 (Aug)                     40.43%
+  DeepLabV3-ResNet50 (No Aug)               54.53%
+  UWSegFormer (No Aug)                      39.74%
+  UNet-ResAttn-V3 (No Aug)                  50.52%
+  UNet-ResAttn-V4 (No Aug)                  49.60%
+  UNet-ResAttn (Aug)                        10.50%
+  UNet-ResAttn-V2 (No Aug)                  13.76%
+  SUIM-Net Keras VGG (No Aug)                2.52%
+  SUIM-Net Keras VGG (Aug)                   2.54%
+  SUIM-Net Keras RSB (Aug)                   1.19%
+  SUIM-Net Keras RSB (No Aug)                0.83%
+
+Plant:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  24.96%
+  UWSegFormer (Aug)                         24.06%
+  UNet-ResAttn-V4 (Aug)                     26.28%
+  DeepLabV3-ResNet50 (No Aug)               25.80%
+  UWSegFormer (No Aug)                      16.38%
+  UNet-ResAttn-V3 (No Aug)                  19.51%
+  UNet-ResAttn-V4 (No Aug)                   4.95%
+  UNet-ResAttn (Aug)                        10.29%
+  SUIM-Net (PyTorch, Aug)                    0.01%
+  UNet-ResAttn-V2 (No Aug)                  24.10%
+  SUIM-Net Keras VGG (No Aug)               11.53%
+  SUIM-Net Keras VGG (Aug)                  10.39%
+  SUIM-Net Keras RSB (Aug)                   0.01%
+  SUIM-Net Keras RSB (No Aug)                0.28%
+
+Wreck:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  70.09%
+  UWSegFormer (Aug)                         78.49%
+  UNet-ResAttn-V4 (Aug)                     72.49%
+  DeepLabV3-ResNet50 (No Aug)               70.83%
+  UWSegFormer (No Aug)                      71.93%
+  UNet-ResAttn-V3 (No Aug)                  70.10%
+  UNet-ResAttn-V4 (No Aug)                  68.31%
+  UNet-ResAttn-V3 (Aug)                     67.98%
+  UNet-ResAttn (Aug)                        45.34%
+  SUIM-Net (PyTorch, Aug)                   47.85%
+  UNet-ResAttn-V2 (No Aug)                  39.33%
+  SUIM-Net Keras VGG (No Aug)                0.92%
+  SUIM-Net Keras VGG (Aug)                   1.93%
+  SUIM-Net Keras RSB (Aug)                   0.00%
+  SUIM-Net Keras RSB (No Aug)                0.00%
+
+Robot:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  69.20%
+  UWSegFormer (Aug)                         72.67%
+  UNet-ResAttn-V4 (Aug)                     64.31%
+  DeepLabV3-ResNet50 (No Aug)               61.96%
+  UWSegFormer (No Aug)                      62.84%
+  UNet-ResAttn-V3 (No Aug)                  72.88%
+  UNet-ResAttn-V4 (No Aug)                  64.65%
+  UNet-ResAttn-V3 (Aug)                     57.28%
+  UNet-ResAttn (Aug)                        42.95%
+  SUIM-Net (PyTorch, Aug)                   52.35%
+  UNet-ResAttn-V2 (No Aug)                  40.86%
+  SUIM-Net Keras VGG (No Aug)                0.23%
+  SUIM-Net Keras VGG (Aug)                   1.35%
+  SUIM-Net Keras RSB (Aug)                   1.15%
+  SUIM-Net Keras RSB (No Aug)                0.30%
+
+Reef/Invertebrate:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  74.63%
+  UWSegFormer (Aug)                         73.70%
+  UNet-ResAttn-V4 (Aug)                     67.44%
+  DeepLabV3-ResNet50 (No Aug)               74.13%
+  UWSegFormer (No Aug)                      73.46%
+  UNet-ResAttn-V3 (No Aug)                  71.42%
+  UNet-ResAttn-V4 (No Aug)                  66.59%
+  UNet-ResAttn-V3 (Aug)                     69.19%
+  UNet-ResAttn (Aug)                        61.69%
+  SUIM-Net (PyTorch, Aug)                   63.01%
+  UNet-ResAttn-V2 (No Aug)                  56.00%
+  SUIM-Net Keras VGG (No Aug)               38.91%
+  SUIM-Net Keras VGG (Aug)                  36.91%
+  SUIM-Net Keras RSB (Aug)                   1.20%
+  SUIM-Net Keras RSB (No Aug)                1.94%
+
+Fish/Vertebrate:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  73.49%
+  UWSegFormer (Aug)                         58.30%
+  UNet-ResAttn-V4 (Aug)                     64.83%
+  DeepLabV3-ResNet50 (No Aug)               54.40%
+  UWSegFormer (No Aug)                      62.36%
+  UNet-ResAttn-V3 (No Aug)                  42.81%
+  UNet-ResAttn-V4 (No Aug)                  58.96%
+  UNet-ResAttn-V3 (Aug)                     35.44%
+  UNet-ResAttn (Aug)                        19.48%
+  SUIM-Net (PyTorch, Aug)                   15.74%
+  UNet-ResAttn-V2 (No Aug)                  18.91%
+  SUIM-Net Keras VGG (No Aug)                0.89%
+  SUIM-Net Keras VGG (Aug)                   0.62%
+  SUIM-Net Keras RSB (Aug)                   0.26%
+  SUIM-Net Keras RSB (No Aug)                0.10%
+
+Sea-floor/Rock:
+----------------------------------------------------------------------
+  DeepLabV3-ResNet50 (Aug)                  78.39%
+  UWSegFormer (Aug)                         73.22%
+  UNet-ResAttn-V4 (Aug)                     73.88%
+  DeepLabV3-ResNet50 (No Aug)               77.47%
+  UWSegFormer (No Aug)                      76.57%
+  UNet-ResAttn-V3 (No Aug)                  74.28%
+  UNet-ResAttn-V4 (No Aug)                  73.69%
+  UNet-ResAttn-V3 (Aug)                     73.40%
+  UNet-ResAttn (Aug)                        65.33%
+  SUIM-Net (PyTorch, Aug)                   62.41%
+  UNet-ResAttn-V2 (No Aug)                  57.87%
+  SUIM-Net Keras VGG (No Aug)                1.71%
+  SUIM-Net Keras VGG (Aug)                   1.56%
+  SUIM-Net Keras RSB (Aug)                  13.89%
+  SUIM-Net Keras RSB (No Aug)                6.77%

@@ -6,126 +6,162 @@ Overall Performance:
 ------------------------------------------------------------
 Model                     Mean IoU        Mean F-score   
 ------------------------------------------------------------
-SUIM-Net                   34.21%          43.18%
-UNet-ResAttn               37.31%          46.87%
-UNet-ResAttn-V2            34.94%          43.89%
-UNet-ResAttn-V3            52.78%          62.04%
-UNet-ResAttn-V4            57.55%          67.03%
-DeepLabV3-ResNet50         50.37%          59.72%
-UWSegFormer                59.49%          68.85%
+SUIM-Net                   32.42%          41.15%
+UNet-ResAttn               33.65%          43.04%
+UNet-ResAttn-V2            32.41%          42.29%
+UNet-ResAttn-V3            52.85%          61.90%
+UNet-ResAttn-V4            54.14%          62.90%
+DeepLabV3-ResNet50         57.46%          67.09%
+UWSegFormer                55.89%          65.26%
 ------------------------------------------------------------
 
 
 
 Per-Class IoU (%):
 
-Background/Plant/Seafloor:
-  SUIM-Net                   80.35%
-  UNet-ResAttn               82.01%
-  UNet-ResAttn-V2            82.49%
-  UNet-ResAttn-V3            85.54%
-  UNet-ResAttn-V4            84.70%
-  DeepLabV3-ResNet50         85.35%
-  UWSegFormer                88.16%
+Background:
+  SUIM-Net                   78.67%
+  UNet-ResAttn               80.12%
+  UNet-ResAttn-V2            78.29%
+  UNet-ResAttn-V3            88.25%
+  UNet-ResAttn-V4            88.01%
+  DeepLabV3-ResNet50         87.12%
+  UWSegFormer                85.53%
 
 Diver:
   SUIM-Net                    0.00%
-  UNet-ResAttn               12.68%
-  UNet-ResAttn-V2            13.18%
-  UNet-ResAttn-V3            33.10%
-  UNet-ResAttn-V4            42.14%
-  DeepLabV3-ResNet50         25.87%
-  UWSegFormer                38.96%
+  UNet-ResAttn                7.31%
+  UNet-ResAttn-V2            10.19%
+  UNet-ResAttn-V3            41.04%
+  UNet-ResAttn-V4            32.33%
+  DeepLabV3-ResNet50         42.06%
+  UWSegFormer                38.29%
+
+Plant:
+  SUIM-Net                    0.01%
+  UNet-ResAttn                6.34%
+  UNet-ResAttn-V2            15.58%
+  UNet-ResAttn-V3            12.72%
+  UNet-ResAttn-V4            19.94%
+  DeepLabV3-ResNet50         16.87%
+  UWSegFormer                18.60%
 
 Wreck:
-  SUIM-Net                   31.89%
-  UNet-ResAttn               33.33%
-  UNet-ResAttn-V2            27.97%
-  UNet-ResAttn-V3            56.90%
-  UNet-ResAttn-V4            59.36%
-  DeepLabV3-ResNet50         57.00%
-  UWSegFormer                60.91%
+  SUIM-Net                   34.98%
+  UNet-ResAttn               31.70%
+  UNet-ResAttn-V2            27.51%
+  UNet-ResAttn-V3            60.93%
+  UNet-ResAttn-V4            62.11%
+  DeepLabV3-ResNet50         60.92%
+  UWSegFormer                67.41%
 
 Robot:
-  SUIM-Net                   33.11%
-  UNet-ResAttn               34.48%
-  UNet-ResAttn-V2            30.22%
-  UNet-ResAttn-V3            47.76%
-  UNet-ResAttn-V4            59.00%
-  DeepLabV3-ResNet50         46.81%
-  UWSegFormer                55.59%
+  SUIM-Net                   39.41%
+  UNet-ResAttn               32.28%
+  UNet-ResAttn-V2            29.98%
+  UNet-ResAttn-V3            63.14%
+  UNet-ResAttn-V4            55.42%
+  DeepLabV3-ResNet50         59.86%
+  UWSegFormer                61.37%
 
 Reef/Invertebrate:
-  SUIM-Net                   45.76%
-  UNet-ResAttn               47.96%
-  UNet-ResAttn-V2            46.86%
-  UNet-ResAttn-V3            51.98%
-  UNet-ResAttn-V4            58.09%
-  DeepLabV3-ResNet50         54.72%
-  UWSegFormer                61.91%
+  SUIM-Net                   48.88%
+  UNet-ResAttn               47.42%
+  UNet-ResAttn-V2            42.21%
+  UNet-ResAttn-V3            59.47%
+  UNet-ResAttn-V4            56.17%
+  DeepLabV3-ResNet50         62.48%
+  UWSegFormer                62.01%
 
 Fish/Vertebrate:
-  SUIM-Net                   14.16%
-  UNet-ResAttn               13.38%
-  UNet-ResAttn-V2             8.90%
-  UNet-ResAttn-V3            41.38%
-  UNet-ResAttn-V4            42.00%
-  DeepLabV3-ResNet50         32.47%
-  UWSegFormer                51.41%
+  SUIM-Net                   10.43%
+  UNet-ResAttn               13.92%
+  UNet-ResAttn-V2            12.97%
+  UNet-ResAttn-V3            36.17%
+  UNet-ResAttn-V4            57.26%
+  DeepLabV3-ResNet50         64.62%
+  UWSegFormer                51.91%
+
+Sea-floor/Rock:
+  SUIM-Net                   46.98%
+  UNet-ResAttn               50.11%
+  UNet-ResAttn-V2            42.56%
+  UNet-ResAttn-V3            61.10%
+  UNet-ResAttn-V4            61.85%
+  DeepLabV3-ResNet50         65.73%
+  UWSegFormer                61.99%
 
 
 Per-Class F-score (%):
 
-Background/Plant/Seafloor:
-  SUIM-Net                   88.87%
-  UNet-ResAttn               89.92%
-  UNet-ResAttn-V2            90.14%
-  UNet-ResAttn-V3            92.08%
-  UNet-ResAttn-V4            91.52%
-  DeepLabV3-ResNet50         91.96%
-  UWSegFormer                93.65%
+Background:
+  SUIM-Net                   87.83%
+  UNet-ResAttn               88.73%
+  UNet-ResAttn-V2            87.49%
+  UNet-ResAttn-V3            93.66%
+  UNet-ResAttn-V4            93.54%
+  DeepLabV3-ResNet50         93.00%
+  UWSegFormer                91.82%
 
 Diver:
   SUIM-Net                    0.00%
-  UNet-ResAttn               17.96%
-  UNet-ResAttn-V2            19.39%
-  UNet-ResAttn-V3            42.51%
-  UNet-ResAttn-V4            52.38%
-  DeepLabV3-ResNet50         33.97%
-  UWSegFormer                50.16%
+  UNet-ResAttn               10.50%
+  UNet-ResAttn-V2            13.76%
+  UNet-ResAttn-V3            50.52%
+  UNet-ResAttn-V4            40.43%
+  DeepLabV3-ResNet50         52.96%
+  UWSegFormer                49.84%
+
+Plant:
+  SUIM-Net                    0.01%
+  UNet-ResAttn               10.29%
+  UNet-ResAttn-V2            24.10%
+  UNet-ResAttn-V3            19.50%
+  UNet-ResAttn-V4            26.27%
+  DeepLabV3-ResNet50         24.94%
+  UWSegFormer                24.07%
 
 Wreck:
-  SUIM-Net                   45.30%
-  UNet-ResAttn               46.52%
-  UNet-ResAttn-V2            40.04%
-  UNet-ResAttn-V3            68.54%
-  UNet-ResAttn-V4            70.03%
-  DeepLabV3-ResNet50         68.31%
-  UWSegFormer                71.54%
+  SUIM-Net                   47.85%
+  UNet-ResAttn               45.34%
+  UNet-ResAttn-V2            39.33%
+  UNet-ResAttn-V3            70.08%
+  UNet-ResAttn-V4            72.48%
+  DeepLabV3-ResNet50         70.10%
+  UWSegFormer                78.50%
 
 Robot:
-  SUIM-Net                   44.43%
-  UNet-ResAttn               46.30%
-  UNet-ResAttn-V2            40.72%
-  UNet-ResAttn-V3            57.64%
-  UNet-ResAttn-V4            68.67%
-  DeepLabV3-ResNet50         56.41%
-  UWSegFormer                66.18%
+  SUIM-Net                   52.35%
+  UNet-ResAttn               42.95%
+  UNet-ResAttn-V2            40.86%
+  UNet-ResAttn-V3            72.89%
+  UNet-ResAttn-V4            64.31%
+  DeepLabV3-ResNet50         69.21%
+  UWSegFormer                72.67%
 
 Reef/Invertebrate:
-  SUIM-Net                   60.23%
-  UNet-ResAttn               62.08%
-  UNet-ResAttn-V2            59.12%
-  UNet-ResAttn-V3            64.57%
-  UNet-ResAttn-V4            70.79%
-  DeepLabV3-ResNet50         68.52%
-  UWSegFormer                73.69%
+  SUIM-Net                   63.01%
+  UNet-ResAttn               61.69%
+  UNet-ResAttn-V2            56.01%
+  UNet-ResAttn-V3            71.42%
+  UNet-ResAttn-V4            67.44%
+  DeepLabV3-ResNet50         74.62%
+  UWSegFormer                73.71%
 
 Fish/Vertebrate:
-  SUIM-Net                   20.26%
-  UNet-ResAttn               18.43%
-  UNet-ResAttn-V2            13.94%
-  UNet-ResAttn-V3            46.90%
-  UNet-ResAttn-V4            48.77%
-  DeepLabV3-ResNet50         39.15%
-  UWSegFormer                57.91%
+  SUIM-Net                   15.75%
+  UNet-ResAttn               19.48%
+  UNet-ResAttn-V2            18.91%
+  UNet-ResAttn-V3            42.81%
+  UNet-ResAttn-V4            64.82%
+  DeepLabV3-ResNet50         73.49%
+  UWSegFormer                58.30%
+
+Sea-floor/Rock:
+  SUIM-Net                   62.41%
+  UNet-ResAttn               65.33%
+  UNet-ResAttn-V2            57.87%
+  UNet-ResAttn-V3            74.27%
+  UNet-ResAttn-V4            73.87%
+  DeepLabV3-ResNet50         78.38%
+  UWSegFormer                73.22%

@@ -15,15 +15,15 @@ from models.unet_resattn_v4 import UNetResAttnV4
 from models.suimnet import SUIMNet
 from models.deeplab_resnet import get_deeplabv3
 from models.uwsegformer import UWSegFormer
-from models.uwsegformer_v2 import UWSegFormerV2
+# from models.uwsegformer_v2 import UWSegFormerV2  # Not implemented yet
 from datasets.suim_dataset import SUIMDataset, CLASS_NAMES, CLASS_NAMES_MERGED
 from datasets.augmentations import train_transforms, val_transforms
 from training.train import train_one_epoch, validate
-from training.loss import DiceCELoss, V4DeepSupervisionLoss, UWSegFormerV2DeepSupervisionLoss
+from training.loss import DiceCELoss, V4DeepSupervisionLoss  # , UWSegFormerV2DeepSupervisionLoss
 from training.eval import evaluate_loader
 from training.utils import save_checkpoint, load_checkpoint, count_parameters
 from training.device_utils import get_device
-from training.visualization import TrainingPlotter
+# from training.visualization import TrainingPlotter  # Requires matplotlib
 
 def get_model(name, num_classes=8, backbone=None):
     """Load model by name."""
@@ -46,10 +46,10 @@ def get_model(name, num_classes=8, backbone=None):
         # Use specified backbone or default to resnet50
         backbone = backbone or 'resnet50'
         return UWSegFormer(backbone=backbone, num_classes=num_classes, pretrained=True)
-    elif name == "uwsegformer_v2":
-        # Enhanced UWSegFormer with color restoration, multi-head attention (deep supervision disabled for stability)
-        backbone = backbone or 'resnet50'
-        return UWSegFormerV2(backbone=backbone, num_classes=num_classes, pretrained=True, deep_supervision=False)
+    # elif name == "uwsegformer_v2":
+    #     # Enhanced UWSegFormer with color restoration, multi-head attention (deep supervision disabled for stability)
+    #     backbone = backbone or 'resnet50'
+    #     return UWSegFormerV2(backbone=backbone, num_classes=num_classes, pretrained=True, deep_supervision=False)
     else:
         raise ValueError(f"Unknown model: {name}")
 
@@ -240,10 +240,10 @@ def main(args):
         criterion = V4DeepSupervisionLoss(aux_weight=0.4, edge_weight=0.1, alpha=class_weights, gamma=2.0)
         print("Using V4DeepSupervisionLoss with class weights and deep supervision")
     else:
-        # Standard DiceCE loss for all other models (including uwsegformer_v2)
+        # Standard DiceCE loss for all other models
         criterion = DiceCELoss(dice_weight=0.5)
-        if args.model == "uwsegformer_v2":
-            print("Using standard DiceCELoss (deep supervision disabled for stability)")
+        # if args.model == "uwsegformer_v2":
+        #     print("Using standard DiceCELoss (deep supervision disabled for stability)")
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='max', factor=0.5, patience=5
@@ -264,7 +264,7 @@ def main(args):
     class_mode = "5cls" if args.merge_classes else "8cls"
     aug_mode = "aug" if args.augment else "noaug"
     plot_name = f"{args.model}_{class_mode}_{aug_mode}_training"
-    plotter = TrainingPlotter(save_dir="visualizations", plot_name=plot_name)
+    # plotter = TrainingPlotter(save_dir="visualizations", plot_name=plot_name)  # Disabled - requires matplotlib
 
     # Training loop
     print(f"\nStarting training for {args.epochs} epochs (starting from epoch {start_epoch})...")
@@ -285,7 +285,7 @@ def main(args):
         scheduler.step(val_iou)
         
         # Update plotter
-        plotter.update(epoch, train_loss, val_loss, train_iou, val_iou)
+        # plotter.update(epoch, train_loss, val_loss, train_iou, val_iou)  # Disabled
         
         # Log
         print(f"Epoch {epoch:3d}/{args.epochs} | "
@@ -299,22 +299,22 @@ def main(args):
             aug_mode = "aug" if args.augment else "noaug"
             save_path = f"checkpoints/{args.model}_{class_mode}_{aug_mode}_best.pth"
             save_checkpoint(model, optimizer, epoch, best_iou, save_path)
-            print(f" Saved best model: {save_path} (mIoU: {best_iou:.4f})")
+            print(f" ★ Saved best model: {save_path} (mIoU: {best_iou:.4f})")
     
     print("=" * 70)
     print(f"Training complete! Best val mIoU: {best_iou:.4f}")
     
     # Save training plots and history
-    print("\nGenerating training plots...")
-    plotter.plot(show=False, save=True)
-    plotter.save_history()
+    # print("\nGenerating training plots...")
+    # plotter.plot(show=False, save=True)
+    # plotter.save_history()
     
     # Print best metrics summary
-    best_metrics = plotter.get_best_metrics()
+    # best_metrics = plotter.get_best_metrics()
     print("\nTraining Summary:")
-    print(f"  Best Val mIoU: {best_metrics['best_val_iou']:.4f} (Epoch {best_metrics['best_val_iou_epoch']})")
-    print(f"  Min Val Loss: {best_metrics['min_val_loss']:.4f} (Epoch {best_metrics['min_val_loss_epoch']})")
-    print(f"  Final Val mIoU: {best_metrics['final_val_iou']:.4f}")
+    print(f"  Best Val mIoU: {best_iou:.4f}")
+    # print(f"  Min Val Loss: {best_metrics['min_val_loss']:.4f} (Epoch {best_metrics['min_val_loss_epoch']})")
+    # print(f"  Final Val mIoU: {best_metrics['final_val_iou']:.4f}")
     
     # Final evaluation
     print("\nFinal evaluation on validation set:")
@@ -340,7 +340,7 @@ if __name__ == "__main__":
     
     # Model
     parser.add_argument("--model", choices=["unet_resattn", "unet_resattn_v2", "unet_resattn_v3", "unet_resattn_v4",
-                                           "suimnet", "suimnet_keras", "deeplabv3", "uwsegformer", "uwsegformer_v2"],
+                                           "suimnet", "suimnet_keras", "deeplabv3", "uwsegformer"],  # "uwsegformer_v2" not implemented
                        default="unet_resattn", help="Model architecture")
     parser.add_argument("--backbone", type=str, default=None,
                        help="Backbone for uwsegformer (default: resnet50) or suimnet_keras (VGG/RSB). "
