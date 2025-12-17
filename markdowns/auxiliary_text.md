@@ -1,0 +1,22 @@
+## Introduction: Subject and Dataset
+
+Semantic segmentation is a fundamental task in computer vision that aims to assign a semantic label to every pixel in an image. Unlike image classification or object detection, semantic segmentation enables dense scene understanding by explicitly modeling object boundaries, spatial relationships, and fine-grained structure. This capability is particularly critical in robotics, where perception systems must reason about complex environments in order to support navigation, interaction, and decision-making.
+
+In underwater robotics, semantic segmentation remains a significantly more challenging and less explored problem than in terrestrial settings. Underwater imagery exhibits domain-specific characteristics such as light absorption and scattering, color distortion, low contrast, motion blur, and highly variable visibility conditions. Moreover, the semantic composition of underwater scenes differs substantially from land environments, involving objects such as fish, reefs, aquatic plants, human divers, robots, and wrecks. As a result, state-of-the-art segmentation models trained on terrestrial datasets (e.g., urban or indoor scenes) do not generalize well to underwater domains, creating a strong need for dedicated datasets and benchmarks.
+
+To address this gap, the **Semantic Segmentation of Underwater Imagery (SUIM)** dataset was introduced as the first large-scale, pixel-annotated benchmark designed specifically for general-purpose underwater scene understanding. The dataset consists of **1,525 annotated underwater images** for training and validation, along with an additional **110 images for testing**. Each image is labeled at the pixel level across **eight semantic categories**: waterbody background, human divers, aquatic plants (including sea-grass), wrecks or ruins, robots and instruments, reefs and other invertebrates, fish and other vertebrates, and sea-floor or rocks.
+
+The SUIM dataset was constructed from real underwater imagery collected during oceanic explorations and human–robot collaborative experiments in diverse environments and water conditions. The images span multiple resolutions and visual characteristics, ensuring variability in scene composition, object scale, illumination, and background texture. All annotations were produced by human annotators following consistent labeling guidelines, making the dataset suitable for supervised learning and reliable benchmarking.
+
+By providing multi-class pixel-level annotations for semantically rich underwater scenes, SUIM enables systematic evaluation of modern deep learning–based segmentation models, such as encoder–decoder architectures, UNet-style networks, and atrous convolution models. Beyond semantic segmentation, the dataset also supports downstream tasks including saliency prediction, visual attention modeling, and visual servoing, which are essential for autonomous underwater vehicles operating in real-time scenarios.
+
+In summary, the subject of this work lies at the intersection of **semantic segmentation and underwater robot vision**, and the SUIM dataset serves as a foundational resource for developing, training, and evaluating learning-based perception models tailored to the underwater domain.
+
+
+
+### Dataset Description and Train/Test Split
+
+The SUIM dataset is composed of **1,635 natural underwater images**, each annotated at the pixel level for semantic segmentation. The dataset defines **eight semantic classes** that commonly appear in underwater exploration and human–robot interaction scenarios: waterbody background, human divers, aquatic plants (including sea-grass), wrecks or ruins, robots and instruments, reefs and other invertebrates, fish and other vertebrates, and sea-floor or rocks. The images were collected from real oceanic environments under varying conditions of visibility, depth, lighting, and water quality, and span multiple spatial resolutions. All annotations were produced manually by human annotators following consistent labeling guidelines to ensure semantic coherence and reliable ground truth. For experimental evaluation, the dataset is split into **1,525 images for training and validation** and a **held-out test set of 110 images**, which is reserved exclusively for benchmarking model performance. This separation ensures a fair and unbiased assessment of generalization, as the test images are not seen during training and reflect diverse underwater scenes and object configurations.
+
+
+  
